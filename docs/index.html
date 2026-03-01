@@ -613,6 +613,9 @@
   <button class="active" onclick="switchTab('shruti')">🎵 Shruti & Tanpura</button>
   <button onclick="switchTab('varisai')">⏱ Varisai Drills</button>
   <button onclick="switchTab('game')">🎯 Swarasthanam Game</button>
+  <button onclick="switchTab('ragagame')">🎼 Guess the Ragam</button>
+  <button onclick="switchTab('shadow')">⚡ Swaram Shadowing</button>
+  <button onclick="switchTab('beatgame')">🥁 Beat Position</button>
 </nav>
 
 <!-- GLOBAL TANPURA BAR -->
@@ -815,6 +818,272 @@
         </div>
       </div>
     </div>
+
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 4: GUESS THE RAGAM
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-ragagame" class="tab-panel">
+
+    <!-- SETUP -->
+    <div id="rgSetup">
+      <div class="card">
+        <div class="card-title">Guess the Ragam</div>
+        <p class="info-text" style="margin-bottom:24px;">A sequence of swarams will play. Select all the ragas those notes could belong to — some sequences are valid in more than one raga.</p>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Notes per sequence</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;" id="rgNoteCount"></div>
+        </div>
+
+        <button class="btn primary" onclick="rgStart()" style="font-size:16px; padding:14px 36px;">✦ Begin</button>
+      </div>
+    </div>
+
+    <!-- PLAY -->
+    <div id="rgPlay" style="display:none;">
+      <div class="card">
+        <div style="display:flex; align-items:center; gap:20px; margin-bottom:24px; flex-wrap:wrap;">
+          <div>
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Round</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:var(--gold-light);" id="rgRound">1 / 8</div>
+          </div>
+          <div style="flex:1; height:1px; background:var(--border);"></div>
+          <div style="text-align:right;">
+            <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Score</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:var(--gold-light);" id="rgScore">0</div>
+          </div>
+        </div>
+
+        <!-- Sequence slots -->
+        <div id="rgSeqDisplay" style="display:flex; gap:8px; justify-content:center; flex-wrap:wrap; margin-bottom:24px; min-height:56px; align-items:center;"></div>
+
+        <!-- Play button -->
+        <div style="text-align:center; margin-bottom:28px;">
+          <button class="btn primary" id="rgPlayBtn" onclick="rgPlaySequence()" style="font-size:15px; padding:13px 32px;">▶ Play Sequence</button>
+        </div>
+
+        <!-- Raga choices — multi-select -->
+        <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Select all ragas this sequence could belong to</div>
+        <div id="rgChoices" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px; margin-bottom:24px;"></div>
+
+        <!-- Hint -->
+        <div id="rgHint" style="font-size:13px; color:var(--cream-dim); font-style:italic; text-align:center; margin-bottom:16px; min-height:20px;"></div>
+
+        <!-- Submit -->
+        <div style="text-align:center; margin-bottom:16px;">
+          <button class="btn primary" id="rgSubmitBtn" onclick="rgSubmit()" style="font-size:15px; padding:13px 32px;">Submit Answer</button>
+        </div>
+
+        <!-- Feedback -->
+        <div id="rgFeedback" style="display:none; padding:16px; border:1px solid var(--border); background:var(--surface2); margin-bottom:20px;"></div>
+
+        <div class="btn-row" style="justify-content:center; gap:16px;">
+          <button class="btn" id="rgNextBtn" style="display:none;" onclick="rgNextRound()">Next Round →</button>
+          <button class="btn danger" onclick="rgEnd()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="rgResults" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Session Complete</div>
+        <div style="font-family:var(--font-display); font-size:64px; color:var(--gold-light); text-shadow:0 0 40px rgba(201,148,58,0.5); margin:20px 0;" id="rgFinalScore"></div>
+        <div style="font-size:18px; color:var(--cream-dim); font-style:italic; margin-bottom:8px;" id="rgFinalMsg"></div>
+        <div style="font-size:14px; color:var(--cream-dim); margin-bottom:32px;" id="rgFinalDetail"></div>
+        <div class="btn-row" style="justify-content:center; gap:16px;">
+          <button class="btn primary" onclick="rgReset()">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 5: SWARAM SHADOWING
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-shadow" class="tab-panel">
+
+    <!-- SETUP -->
+    <div id="ssSetup">
+      <div class="card">
+        <div class="card-title">Swaram Shadowing</div>
+        <p class="info-text" style="margin-bottom:24px;">A note plays — tap it before the timer runs out. Build streaks to level up. The timer gets shorter as you climb.</p>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Raga</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(190px,1fr)); gap:10px;" id="ssRagaGrid"></div>
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:14px;">Starting Level</div>
+          <div style="display:flex; gap:10px;" id="ssLevelPicker"></div>
+        </div>
+
+        <button class="btn primary" onclick="ssStart()" style="font-size:16px; padding:14px 36px;">✦ Begin</button>
+      </div>
+    </div>
+
+    <!-- PLAY -->
+    <div id="ssPlay" style="display:none;">
+      <div class="card">
+
+        <!-- Header row: level / accuracy / streak / score -->
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:12px; margin-bottom:24px; text-align:center;">
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Level</div>
+            <div style="font-family:var(--font-display); font-size:28px; color:var(--gold-light);" id="ssLevel">1</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Accuracy</div>
+            <div style="font-family:var(--font-display); font-size:28px; color:var(--gold-light);" id="ssAccuracy">—</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Streak</div>
+            <div style="font-family:var(--font-display); font-size:28px; color:var(--gold-light);" id="ssStreak">0</div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Score</div>
+            <div style="font-family:var(--font-display); font-size:28px; color:var(--gold-light);" id="ssScore">0</div>
+          </div>
+        </div>
+
+        <!-- Level progress bar: streak needed to advance -->
+        <div style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--cream-dim); margin-bottom:6px;">
+            <span id="ssLevelLabel">Level 1 — Sa & Pa</span>
+            <span id="ssStreakProgress">0 / 5 to level up</span>
+          </div>
+          <div style="height:4px; background:var(--surface2); border:1px solid var(--border); border-radius:2px;">
+            <div id="ssLevelBar" style="height:100%; background:var(--gold); border-radius:2px; width:0%; transition:width 0.3s;"></div>
+          </div>
+        </div>
+
+        <!-- Note display: the swaram that just played -->
+        <div style="text-align:center; margin-bottom:16px;">
+          <div id="ssNoteDisplay" style="
+            font-family:var(--font-display); font-size:52px; color:var(--cream-dim);
+            min-height:72px; line-height:72px; letter-spacing:2px;
+            transition: all 0.2s;
+          ">—</div>
+          <div id="ssNoteSub" style="font-size:13px; color:var(--cream-dim); letter-spacing:2px; min-height:20px;"></div>
+        </div>
+
+        <!-- Timer bar -->
+        <div style="margin-bottom:24px;">
+          <div style="height:8px; background:var(--surface2); border:1px solid var(--border); border-radius:4px; overflow:hidden;">
+            <div id="ssTimerBar" style="height:100%; background:var(--gold); width:100%; transition:width linear;"></div>
+          </div>
+        </div>
+
+        <!-- Answer buttons -->
+        <div id="ssAnswerGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:8px; margin-bottom:20px;"></div>
+
+        <!-- Feedback flash -->
+        <div id="ssFeedback" style="text-align:center; font-size:18px; min-height:28px; font-style:italic; color:var(--gold-light); transition:opacity 0.3s;"></div>
+
+        <div class="btn-row" style="justify-content:center; margin-top:20px;">
+          <button class="btn danger" onclick="ssQuit()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- GAME OVER -->
+    <div id="ssOver" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Game Over</div>
+        <div style="font-family:var(--font-display); font-size:64px; color:var(--gold-light); text-shadow:0 0 40px rgba(201,148,58,0.5); margin:16px 0;" id="ssFinalScore"></div>
+        <div style="font-size:16px; color:var(--cream-dim); font-style:italic; margin-bottom:8px;" id="ssFinalMsg"></div>
+        <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:16px; max-width:360px; margin:24px auto; text-align:center;">
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; color:var(--cream-dim); text-transform:uppercase;">Level Reached</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:var(--gold-light);" id="ssFinalLevel"></div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; color:var(--cream-dim); text-transform:uppercase;">Best Streak</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:var(--gold-light);" id="ssFinalStreak"></div>
+          </div>
+          <div>
+            <div style="font-size:11px; letter-spacing:2px; color:var(--cream-dim); text-transform:uppercase;">Accuracy</div>
+            <div style="font-family:var(--font-display); font-size:32px; color:var(--gold-light);" id="ssFinalAccuracy"></div>
+          </div>
+        </div>
+        <div class="btn-row" style="justify-content:center; gap:16px;">
+          <button class="btn primary" onclick="ssReset()">Play Again</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 6: BEAT POSITION
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-beatgame" class="tab-panel">
+
+    <!-- SETUP -->
+    <div id="bpSetup">
+      <div class="card">
+        <div class="card-title">Beat Position</div>
+        <p class="info-text" style="margin-bottom:24px;">The talam plays with accented beats. One or more beats play a different sound — identify which beat positions they landed on.</p>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Talam</div>
+          <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;" id="bpTalamGrid"></div>
+        </div>
+
+        <div style="margin-bottom:24px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Tempo</div>
+          <div style="display:flex; align-items:center; gap:14px; flex-wrap:wrap;">
+            <input type="range" id="bpTempoSlider" min="40" max="160" value="80" oninput="document.getElementById('bpTempoVal').textContent = this.value + ' BPM'">
+            <span id="bpTempoVal" style="font-size:15px; color:var(--gold-light); letter-spacing:1px; min-width:70px;">80 BPM</span>
+          </div>
+        </div>
+
+        <div style="margin-bottom:28px;">
+          <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:12px;">Intensity</div>
+          <div style="display:flex; gap:10px; flex-wrap:wrap;" id="bpLevelPicker"></div>
+        </div>
+
+        <button class="btn primary" onclick="bpStart()" style="font-size:16px; padding:14px 36px;">✦ Begin</button>
+      </div>
+    </div>
+
+    <!-- PLAY -->
+    <div id="bpPlay" style="display:none;">
+      <div class="card">
+
+        <!-- Talam name + intensity reminder -->
+        <div style="font-size:13px; color:var(--cream-dim); letter-spacing:2px; text-transform:uppercase; text-align:center; margin-bottom:20px;" id="bpRoundInfo"></div>
+
+        <!-- Beat visualizer -->
+        <div id="bpBeatRow" style="display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-bottom:24px;"></div>
+
+        <!-- Play button -->
+        <div style="text-align:center; margin-bottom:28px;">
+          <button class="btn primary" id="bpPlayBtn" onclick="bpPlaySequence()">▶ Play Talam</button>
+        </div>
+
+        <!-- Answer grid -->
+        <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:10px;" id="bpAnswerLabel">
+          Select <span id="bpAnswerCount">1</span> beat position<span id="bpAnswerPlural"></span>
+        </div>
+        <div id="bpAnswerGrid" style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px;"></div>
+
+        <div style="text-align:center; margin-bottom:16px;">
+          <button class="btn primary" id="bpSubmitBtn" onclick="bpSubmit()">Submit Answer</button>
+        </div>
+
+        <!-- Feedback -->
+        <div id="bpFeedback" style="display:none; padding:16px; border:1px solid var(--border); background:var(--surface2); margin-bottom:20px; font-size:15px;"></div>
+
+        <div class="btn-row" style="justify-content:center; gap:16px; margin-top:8px;">
+          <button class="btn primary" id="bpNextBtn" style="display:none;" onclick="bpBeginRound()">▶ Next</button>
+          <button class="btn danger" onclick="bpQuit()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESULTS removed — game is endless, just quit when done -->
 
   </div>
 
@@ -1818,6 +2087,908 @@ function resetGame() {
   document.getElementById('gamePlay').style.display = 'none';
   document.getElementById('gameResults').style.display = 'none';
   document.getElementById('gameSetup').style.display = 'block';
+}
+
+
+// ═══════════════════════════════════
+// GUESS THE RAGAM GAME
+// ═══════════════════════════════════
+
+const RG_ROUNDS = 5;
+
+// For each raga, the pool of swaram keys available
+// We use the same RAGAS array — keys of raga.semi
+const RG_RAGA_NAMES = ['Mayamalavagowlai','Kharaharapriya','Shankarabharnam','Kalyani'];
+
+// Precompute which ragas share each swaram key+semitone combination.
+// A sequence belongs to a raga if ALL its notes are present in that raga's semi map.
+function rgRagasForSequence(sequence, sourceSemi) {
+  // For each candidate raga, check if every note in the sequence (using sourceSemi offsets)
+  // has a matching semitone value in that raga
+  return RAGAS.filter(raga => {
+    return sequence.every(key => {
+      const targetSemi = sourceSemi[key];
+      // Does this raga have ANY key with the same semitone value?
+      return Object.values(raga.semi).includes(targetSemi);
+    });
+  }).map(r => r.name);
+}
+
+// Game state
+let rgNotes    = 3;
+let rgRound    = 1;
+let rgScore    = 0;
+let rgSequence = [];       // note keys from source raga
+let rgSourceRaga = null;   // the raga the sequence was drawn from
+let rgCorrectRagas = [];   // raga names the sequence is actually valid for
+let rgSelected = new Set();// user's current multi-select choices
+let rgSubmitted = false;
+
+// ── Build setup UI ──
+(function buildRgSetup() {
+  const nc = document.getElementById('rgNoteCount');
+  [2,3,4,5].forEach(n => {
+    const btn = document.createElement('button');
+    btn.className = 'shruti-btn' + (n === 3 ? ' selected' : '');
+    btn.style.cssText = 'min-width:64px; padding:12px 10px;';
+    btn.innerHTML = `<div style="font-size:22px;font-weight:700">${n}</div><div style="font-size:11px;opacity:0.7">notes</div>`;
+    btn.onclick = () => {
+      nc.querySelectorAll('.shruti-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      rgNotes = n;
+    };
+    nc.appendChild(btn);
+  });
+})();
+
+// Returns the specific variant name for a swaram key given its semitone value
+// e.g. key='r', semi=1 → 'R1', key='r', semi=2 → 'R2', key='g', semi=4 → 'G3' etc.
+const RG_VARIANT_NAMES = {
+  s: { 0:'Sa' },
+  r: { 1:'R1', 2:'R2' },
+  g: { 3:'G2', 4:'G3' },
+  m: { 5:'M1', 6:'M2' },
+  p: { 7:'Pa' },
+  d: { 8:'D1', 9:'D2' },
+  n: { 10:'N2', 11:'N3' },
+  S: { 12:'Ṡa' },
+};
+function rgVariantLabel(key, semi) {
+  return (RG_VARIANT_NAMES[key] && RG_VARIANT_NAMES[key][semi]) || SWARAM_LABELS[key] || key.toUpperCase();
+}
+function rgGenerateRound() {
+  // Pick a random source raga
+  rgSourceRaga = RAGAS[Math.floor(Math.random() * RAGAS.length)];
+  const pool = Object.keys(rgSourceRaga.semi); // s r g m p d n S
+
+  // Pick rgNotes notes, no consecutive repeats
+  const seq = [];
+  for (let i = 0; i < rgNotes; i++) {
+    let pick;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; }
+    while (seq.length > 0 && pick === seq[seq.length - 1]);
+    seq.push(pick);
+  }
+  rgSequence = seq;
+
+  // Determine ALL ragas this sequence is valid for
+  rgCorrectRagas = rgRagasForSequence(seq, rgSourceRaga.semi);
+}
+
+// ── Play the sequence ──
+function rgPlaySequence() {
+  const btn = document.getElementById('rgPlayBtn');
+  btn.disabled = true;
+  btn.textContent = '♩ Playing…';
+  const spacing = 0.75;
+  rgSequence.forEach((key, i) => {
+    const semi = rgSourceRaga.semi[key] ?? 0;
+    const freq = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'triangle';
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + i * spacing;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.75, t + 0.03);
+    gain.gain.setValueAtTime(0.75, t + 0.45);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.65);
+    osc.start(t); osc.stop(t + 0.7);
+  });
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = '▶ Play Again';
+  }, rgSequence.length * spacing * 1000 + 500);
+}
+
+// ── Build sequence slot display ──
+function rgBuildSeqDisplay() {
+  const el = document.getElementById('rgSeqDisplay');
+  el.innerHTML = rgSequence.map((_, i) =>
+    `<div id="rgslot-${i}" style="
+      width:52px; height:52px; border:1px solid var(--border);
+      border-radius:1px; background:var(--surface2);
+      display:flex; align-items:center; justify-content:center;
+      font-family:var(--font-display); font-size:18px; color:var(--cream-dim);
+    ">?</div>`
+  ).join('');
+}
+
+// ── Build raga choice buttons ──
+function rgBuildChoices() {
+  const grid = document.getElementById('rgChoices');
+  grid.innerHTML = '';
+  RAGAS.forEach(raga => {
+    const btn = document.createElement('div');
+    btn.id = 'rgbtn-' + raga.name;
+    btn.style.cssText = `
+      padding:16px 14px; border:1px solid var(--border);
+      background:var(--surface2); cursor:pointer;
+      transition:all 0.2s; user-select:none; border-radius:1px;
+    `;
+    btn.innerHTML = `
+      <div style="font-size:15px; font-weight:600; color:var(--cream);">${raga.name}</div>
+      <div style="font-size:11px; color:var(--cream-dim); margin-top:4px; letter-spacing:1px;">${raga.scale}</div>
+    `;
+    btn.onclick = () => {
+      if (rgSubmitted) return;
+      if (rgSelected.has(raga.name)) {
+        rgSelected.delete(raga.name);
+        btn.style.borderColor = 'var(--border)';
+        btn.style.background  = 'var(--surface2)';
+      } else {
+        rgSelected.add(raga.name);
+        btn.style.borderColor = 'var(--gold)';
+        btn.style.background  = 'rgba(201,148,58,0.15)';
+      }
+      // Update hint
+      const count = rgSelected.size;
+      document.getElementById('rgHint').textContent =
+        count === 0 ? '' : `${count} raga${count > 1 ? 's' : ''} selected — submit when ready`;
+    };
+    grid.appendChild(btn);
+  });
+}
+
+// ── Start game ──
+function rgStart() {
+  rgRound = 1; rgScore = 0; rgSelected = new Set(); rgSubmitted = false;
+  document.getElementById('rgSetup').style.display = 'none';
+  document.getElementById('rgResults').style.display = 'none';
+  document.getElementById('rgPlay').style.display = 'block';
+  rgBeginRound();
+}
+
+function rgBeginRound() {
+  rgSelected = new Set(); rgSubmitted = false;
+  rgGenerateRound();
+  document.getElementById('rgRound').textContent = rgRound + ' / ' + RG_ROUNDS;
+  document.getElementById('rgScore').textContent = rgScore;
+  document.getElementById('rgFeedback').style.display = 'none';
+  document.getElementById('rgNextBtn').style.display = 'none';
+  document.getElementById('rgSubmitBtn').style.display = 'inline-block';
+  document.getElementById('rgHint').textContent = '';
+  document.getElementById('rgPlayBtn').textContent = '▶ Play Sequence';
+  document.getElementById('rgPlayBtn').disabled = false;
+  rgBuildSeqDisplay();
+  rgBuildChoices();
+  // Auto-play
+  setTimeout(rgPlaySequence, 600);
+}
+
+// ── Submit answer ──
+function rgSubmit() {
+  if (rgSubmitted) return;
+  if (rgSelected.size === 0) {
+    document.getElementById('rgHint').textContent = 'Select at least one raga before submitting.';
+    return;
+  }
+  rgSubmitted = true;
+
+  // Reveal the sequence notes
+  rgSequence.forEach((key, i) => {
+    const slot = document.getElementById('rgslot-' + i);
+    if (slot) {
+      const semi = rgSourceRaga.semi[key] ?? 0;
+      slot.textContent = rgVariantLabel(key, semi);
+      slot.style.color = 'var(--gold-light)';
+      slot.style.borderColor = 'var(--gold)';
+      slot.style.background = 'rgba(201,148,58,0.12)';
+    }
+  });
+
+  // Score: all-or-nothing — must select exactly the correct set of ragas
+  const correct   = rgCorrectRagas;
+  const selected  = [...rgSelected];
+  const exactMatch = selected.length === correct.length &&
+                     selected.every(r => correct.includes(r));
+  const roundPts  = exactMatch ? 1 : 0;
+  const maxPts    = 1;
+  rgScore += roundPts;
+  document.getElementById('rgScore').textContent = rgScore;
+
+  // Color the choice buttons
+  RAGAS.forEach(raga => {
+    const btn = document.getElementById('rgbtn-' + raga.name);
+    if (!btn) return;
+    const wasSelected = rgSelected.has(raga.name);
+    const isCorrect   = correct.includes(raga.name);
+    if (isCorrect && wasSelected)  { btn.style.borderColor = 'var(--gold)';  btn.style.background = 'rgba(201,148,58,0.22)'; }
+    else if (isCorrect && !wasSelected) { btn.style.borderColor = '#6ab'; btn.style.background = 'rgba(80,160,180,0.15)'; } // missed
+    else if (!isCorrect && wasSelected) { btn.style.borderColor = 'var(--red)'; btn.style.background = 'rgba(192,58,42,0.18)'; }
+    btn.style.cursor = 'default';
+  });
+
+  // Build feedback explanation
+  const allSwarams = rgSequence.map(k => rgVariantLabel(k, rgSourceRaga.semi[k] ?? 0)).join(' – ');
+  let why = '';
+  // Show what makes this ambiguous — which swarams are shared
+  if (correct.length > 1) {
+    why = `<p style="margin:6px 0; color:var(--cream-dim); font-size:13px;">This sequence is valid in <strong style="color:var(--gold-light)">${correct.length} ragas</strong> because these notes appear in all of them.</p>`;
+  } else {
+    // Explain which note(s) are unique identifiers
+    why = `<p style="margin:6px 0; color:var(--cream-dim); font-size:13px;">This sequence uniquely identifies <strong style="color:var(--gold-light)">${correct[0]}</strong>.</p>`;
+  }
+
+  const perfectRound = exactMatch;
+  const fb = document.getElementById('rgFeedback');
+  fb.style.display = 'block';
+  fb.innerHTML = `
+    <div style="font-size:16px; font-weight:600; color:${perfectRound ? 'var(--gold-light)' : 'var(--cream)'}; margin-bottom:10px;">
+      ${perfectRound ? '✦ Correct!' : '✗ Not quite'}
+    </div>
+    <div style="font-size:14px; color:var(--cream-dim); margin-bottom:8px;">
+      Sequence: <span style="color:var(--cream); font-style:italic;">${allSwarams}</span>
+    </div>
+    <div style="font-size:14px; color:var(--cream-dim); margin-bottom:4px;">
+      Valid raga${correct.length > 1 ? 's' : ''}: <strong style="color:var(--gold-light)">${correct.join(', ')}</strong>
+    </div>
+    ${why}
+  `;
+
+  document.getElementById('rgHint').textContent = '';
+  document.getElementById('rgSubmitBtn').style.display = 'none';
+
+  if (rgRound >= RG_ROUNDS) {
+    setTimeout(rgShowResults, 1400);
+  } else {
+    rgRound++;
+    document.getElementById('rgNextBtn').style.display = 'inline-block';
+  }
+}
+
+function rgNextRound() { rgBeginRound(); }
+
+function rgShowResults() {
+  document.getElementById('rgPlay').style.display = 'none';
+  document.getElementById('rgResults').style.display = 'block';
+  document.getElementById('rgFinalScore').textContent = rgScore + ' / ' + RG_ROUNDS;
+  document.getElementById('rgFinalDetail').textContent = `${rgScore} correct out of ${RG_ROUNDS} rounds`;
+  const msgs = [
+    [5, '✦ Flawless — you hear every raga clearly.'],
+    [4, '✦ Excellent — just one slip.'],
+    [3, 'Good ear — the ragas are becoming distinct.'],
+    [1, 'Keep listening — focus on the characteristic swarams.'],
+    [0, 'Every listen sharpens the ear. Try again.'],
+  ];
+  document.getElementById('rgFinalMsg').textContent = msgs.find(([min]) => rgScore >= min)[1];
+}
+
+function rgEnd() {
+  document.getElementById('rgPlay').style.display = 'none';
+  rgReset();
+}
+
+function rgReset() {
+  document.getElementById('rgPlay').style.display = 'none';
+  document.getElementById('rgResults').style.display = 'none';
+  document.getElementById('rgSetup').style.display = 'block';
+}
+
+
+// ═══════════════════════════════════
+// SWARAM SHADOWING
+// ═══════════════════════════════════
+
+// Levels define: timer duration (ms), notes pool, streak needed to advance
+const SS_LEVELS = [
+  { label:'Sa & Pa',           pool:['s','p'],                         timer:3000, streakNeeded:5  },
+  { label:'+ Ri & Da',         pool:['s','r','p','d'],                 timer:2500, streakNeeded:6  },
+  { label:'+ Ga & Ni',         pool:['s','r','g','p','d','n'],         timer:2200, streakNeeded:7  },
+  { label:'+ Ma',              pool:['s','r','g','m','p','d','n'],     timer:1800, streakNeeded:8  },
+  { label:'Full scale + Ṡa',   pool:['s','r','g','m','p','d','n','S'],timer:1400, streakNeeded:10 },
+  { label:'Speed — 1.2s',      pool:['s','r','g','m','p','d','n','S'],timer:1200, streakNeeded:10 },
+  { label:'Speed — 1.0s',      pool:['s','r','g','m','p','d','n','S'],timer:1000, streakNeeded:10 },
+  { label:'Master — 0.8s',     pool:['s','r','g','m','p','d','n','S'],timer:800,  streakNeeded:999},
+];
+
+let ssRagaIdx   = 0;
+let ssLevelIdx  = 0;
+let ssScore     = 0;
+let ssStreak    = 0;
+let ssBestStreak = 0;
+let ssCurrentKey = null;
+let ssTimerHandle = null;
+let ssTimerStart  = null;
+let ssTimerDur    = 0;
+let ssActive    = false;   // waiting for answer
+let ssTotalAnswered = 0;
+let ssTotalCorrect  = 0;
+let ssLevelStreak   = 0;   // streak within current level toward level-up
+
+// ── Setup UI ──
+(function buildSsSetup() {
+  const rg = document.getElementById('ssRagaGrid');
+  RAGAS.forEach((raga, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+    btn.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--cream)">${raga.name}</div>
+                     <div style="font-size:11px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px">${raga.scale}</div>`;
+    btn.onclick = () => {
+      rg.querySelectorAll('.varisai-item').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      ssRagaIdx = i;
+    };
+    rg.appendChild(btn);
+  });
+
+  const lp = document.getElementById('ssLevelPicker');
+  [1,2,3].forEach(lvl => {
+    const btn = document.createElement('button');
+    btn.className = 'shruti-btn' + (lvl === 1 ? ' selected' : '');
+    btn.style.cssText = 'min-width:72px; padding:12px 10px;';
+    btn.innerHTML = `<div style="font-size:18px;font-weight:700">Lvl ${lvl}</div><div style="font-size:11px;opacity:0.7;margin-top:3px">${SS_LEVELS[lvl-1].label}</div>`;
+    btn.onclick = () => {
+      lp.querySelectorAll('.shruti-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      ssLevelIdx = lvl - 1;
+    };
+    lp.appendChild(btn);
+  });
+})();
+
+function ssStart() {
+  ssScore = 0; ssStreak = 0; ssBestStreak = 0;
+  ssTotalAnswered = 0; ssTotalCorrect = 0; ssLevelStreak = 0;
+  document.getElementById('ssSetup').style.display = 'none';
+  document.getElementById('ssOver').style.display = 'none';
+  document.getElementById('ssPlay').style.display = 'block';
+  ssUpdateHUD();
+  ssNextNote();
+}
+
+function ssUpdateHUD() {
+  const lvl = SS_LEVELS[ssLevelIdx];
+  document.getElementById('ssLevel').textContent = ssLevelIdx + 1;
+  document.getElementById('ssStreak').textContent = ssStreak;
+  document.getElementById('ssScore').textContent = ssScore;
+  const acc = ssTotalAnswered > 0 ? Math.round((ssTotalCorrect / ssTotalAnswered) * 100) + '%' : '—';
+  document.getElementById('ssAccuracy').textContent = acc;
+  document.getElementById('ssLevelLabel').textContent = `Level ${ssLevelIdx + 1} — ${lvl.label}`;
+  const needed = lvl.streakNeeded;
+  document.getElementById('ssStreakProgress').textContent =
+    ssLevelIdx < SS_LEVELS.length - 1
+      ? `${ssLevelStreak} / ${needed} to level up`
+      : `Level MAX — ${ssLevelStreak} streak`;
+  const pct = Math.min(100, (ssLevelStreak / needed) * 100);
+  document.getElementById('ssLevelBar').style.width = pct + '%';
+}
+
+function ssNextNote() {
+  const lvl = SS_LEVELS[ssLevelIdx];
+  const pool = lvl.pool;
+
+  // Pick a random note, avoid same as last
+  let key;
+  do { key = pool[Math.floor(Math.random() * pool.length)]; }
+  while (pool.length > 1 && key === ssCurrentKey);
+  ssCurrentKey = key;
+
+  // Play the note
+  const raga = RAGAS[ssRagaIdx];
+  const semi  = raga.semi[key] ?? 0;
+  const freq  = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+  const sustain = 0.6;
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.type = 'triangle';
+  osc.frequency.value = freq;
+  const t = ctx.currentTime;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+  gain.gain.setValueAtTime(0.75, t + sustain * 0.6);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + sustain);
+  osc.start(t); osc.stop(t + sustain + 0.05);
+
+  // Show "?" in note display while active
+  document.getElementById('ssNoteDisplay').textContent = '?';
+  document.getElementById('ssNoteDisplay').style.color = 'var(--cream-dim)';
+  document.getElementById('ssNoteSub').textContent = '';
+  document.getElementById('ssFeedback').textContent = '';
+
+  // Build / refresh answer buttons for current pool
+  ssBuildAnswerGrid(pool);
+
+  // Start countdown timer
+  ssActive = true;
+  ssTimerDur = lvl.timer;
+  ssTimerStart = performance.now();
+  const bar = document.getElementById('ssTimerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '100%';
+  bar.style.background = 'var(--gold)';
+  // Force reflow then animate
+  bar.getBoundingClientRect();
+  bar.style.transition = `width ${ssTimerDur}ms linear`;
+  bar.style.width = '0%';
+
+  // Timeout = missed
+  ssTimerHandle = setTimeout(() => {
+    if (!ssActive) return;
+    ssActive = false;
+    ssMiss('⏱ Too slow!');
+  }, ssTimerDur);
+}
+
+function ssBuildAnswerGrid(pool) {
+  // Show ALL raga notes as buttons but only the pool ones are enabled
+  const raga = RAGAS[ssRagaIdx];
+  const grid = document.getElementById('ssAnswerGrid');
+  grid.innerHTML = '';
+  SWARAM_KEYS.forEach(key => {
+    if (!(key in raga.semi)) return;
+    const inPool = pool.includes(key);
+    const semi = raga.semi[key];
+    const label = rgVariantLabel(key, semi);
+    const btn = document.createElement('button');
+    btn.id = 'ssbtn-' + key;
+    btn.style.cssText = `
+      background: var(--surface2); border: 1px solid ${inPool ? 'var(--border)' : 'rgba(255,255,255,0.06)'};
+      color: ${inPool ? 'var(--cream)' : 'var(--cream-dim)'}; font-family: var(--font-body);
+      font-size: 16px; font-weight: 600; padding: 14px 8px;
+      cursor: ${inPool ? 'pointer' : 'default'}; transition: all 0.15s;
+      border-radius:1px; text-align:center; letter-spacing:1px;
+      opacity: ${inPool ? '1' : '0.3'};
+    `;
+    btn.textContent = label;
+    if (inPool) {
+      btn.onmouseover = () => { if (!btn.disabled) { btn.style.borderColor = 'var(--gold)'; btn.style.background = 'rgba(201,148,58,0.1)'; } };
+      btn.onmouseout  = () => { if (!btn.disabled) { btn.style.borderColor = 'var(--border)'; btn.style.background = 'var(--surface2)'; } };
+      btn.onclick = () => ssGuess(key);
+    }
+    grid.appendChild(btn);
+  });
+}
+
+function ssGuess(key) {
+  if (!ssActive) return;
+  ssActive = false;
+  clearTimeout(ssTimerHandle);
+
+  // Stop timer bar
+  const bar = document.getElementById('ssTimerBar');
+  const elapsed = performance.now() - ssTimerStart;
+  const remaining = Math.max(0, 1 - elapsed / ssTimerDur);
+  bar.style.transition = 'none';
+  bar.style.width = (remaining * 100) + '%';
+
+  const raga = RAGAS[ssRagaIdx];
+  const semi = raga.semi[ssCurrentKey];
+  const correctLabel = rgVariantLabel(ssCurrentKey, semi);
+
+  // Disable all buttons immediately
+  document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = true);
+
+  if (key === ssCurrentKey) {
+    // Show correct
+    document.getElementById('ssNoteDisplay').textContent = correctLabel;
+    document.getElementById('ssNoteDisplay').style.color = 'var(--gold-light)';
+    const correctBtn = document.getElementById('ssbtn-' + key);
+    if (correctBtn) { correctBtn.style.borderColor = 'var(--gold)'; correctBtn.style.background = 'rgba(201,148,58,0.2)'; }
+    ssHit(key, correctLabel, remaining);
+    setTimeout(() => {
+      if (document.getElementById('ssPlay').style.display !== 'none') ssNextNote();
+    }, 900);
+  } else {
+    // Flash wrong button, ssMiss handles the rest
+    const wrongBtn = document.getElementById('ssbtn-' + key);
+    if (wrongBtn) { wrongBtn.style.borderColor = 'var(--red)'; wrongBtn.style.background = 'rgba(192,58,42,0.2)'; }
+    ssMiss(`✗ That was ${correctLabel}`);
+  }
+}
+
+function ssHit(key, label, remaining) {
+  ssTotalAnswered++; ssTotalCorrect++;
+  ssStreak++;
+  ssLevelStreak++;
+  if (ssStreak > ssBestStreak) ssBestStreak = ssStreak;
+
+  // Speed bonus: faster answer = more points
+  const speedBonus = Math.ceil(remaining * 3);
+  const pts = 10 + (ssLevelIdx * 5) + speedBonus;
+  ssScore += pts;
+
+  document.getElementById('ssFeedback').textContent = `+${pts} ✦`;
+  document.getElementById('ssFeedback').style.color = 'var(--gold-light)';
+
+  // Check level up
+  const lvl = SS_LEVELS[ssLevelIdx];
+  if (ssLevelStreak >= lvl.streakNeeded && ssLevelIdx < SS_LEVELS.length - 1) {
+    ssLevelIdx++;
+    ssLevelStreak = 0;
+    document.getElementById('ssFeedback').textContent = `+${pts} ✦  Level Up! →`;
+  }
+
+  ssUpdateHUD();
+}
+
+function ssMiss(msg) {
+  ssTotalAnswered++;
+  ssStreak = 0;
+  ssLevelStreak = Math.max(0, ssLevelStreak - 2);
+
+  document.getElementById('ssFeedback').textContent = msg;
+  document.getElementById('ssFeedback').style.color = '#e06050';
+
+  const bar = document.getElementById('ssTimerBar');
+  bar.style.transition = 'none';
+  bar.style.width = '0%';
+  bar.style.background = 'var(--red)';
+
+  // Show correct answer
+  const raga = RAGAS[ssRagaIdx];
+  const semi = raga.semi[ssCurrentKey];
+  const correctLabel = rgVariantLabel(ssCurrentKey, semi);
+  document.getElementById('ssNoteDisplay').textContent = correctLabel;
+  document.getElementById('ssNoteDisplay').style.color = '#e06050';
+  const correctBtn = document.getElementById('ssbtn-' + ssCurrentKey);
+  if (correctBtn) {
+    correctBtn.style.borderColor = 'var(--red)';
+    correctBtn.style.background = 'rgba(192,58,42,0.2)';
+  }
+
+  // Disable all buttons during pause
+  document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = true);
+
+  ssUpdateHUD();
+
+  // Always continue to next note
+  setTimeout(() => {
+    if (document.getElementById('ssPlay').style.display !== 'none') ssNextNote();
+  }, 1000);
+}
+
+function ssGameOver() {
+  document.getElementById('ssPlay').style.display = 'none';
+  document.getElementById('ssOver').style.display = 'block';
+  const accuracy = ssTotalAnswered > 0 ? Math.round((ssTotalCorrect / ssTotalAnswered) * 100) : 0;
+  document.getElementById('ssFinalScore').textContent = ssScore;
+  document.getElementById('ssFinalLevel').textContent = ssLevelIdx + 1;
+  document.getElementById('ssFinalStreak').textContent = ssBestStreak;
+  document.getElementById('ssFinalAccuracy').textContent = accuracy + '%';
+  const msgs = [
+    [500, '✦ Incredible — your ear is lightning fast.'],
+    [300, 'Sharp reflexes — keep pushing the higher levels.'],
+    [150, 'Good start — the swarams are sticking.'],
+    [0,   'Every attempt builds the connection. Keep going.'],
+  ];
+  document.getElementById('ssFinalMsg').textContent = msgs.find(([min]) => ssScore >= min)[1];
+}
+
+function ssQuit() {
+  clearTimeout(ssTimerHandle);
+  ssActive = false;
+  document.getElementById('ssPlay').style.display = 'none';
+  ssGameOver();
+}
+
+function ssReset() {
+  document.getElementById('ssOver').style.display = 'none';
+  document.getElementById('ssSetup').style.display = 'block';
+}
+
+
+// ═══════════════════════════════════
+// BEAT POSITION GAME
+// ═══════════════════════════════════
+
+const BP_TALAMS = [
+  { name: 'Adi Talam',    beats: 8, description: '8 beats — Chatusra Nadai' },
+  { name: 'Rupaka Talam', beats: 3, description: '3 beats' },
+  { name: 'Misra Chapu',  beats: 7, description: '7 beats' },
+  { name: 'Khanda Chapu', beats: 5, description: '5 beats' },
+];
+
+// Intensity levels — quiz beat count is derived per talam
+// beatCount(talamSize, intensityIdx) maps intensity → actual beat count
+const BP_INTENSITIES = [
+  { label: 'Easy',   name: 'Easy',   fn: (n) => 1 },
+  { label: 'Medium', name: 'Medium', fn: (n) => Math.max(1, Math.round(n * 0.25)) },
+  { label: 'Hard',   name: 'Hard',   fn: (n) => Math.max(1, Math.round(n * 0.40)) },
+  { label: 'Expert', name: 'Expert', fn: (n) => Math.max(1, Math.round(n * 0.60)) },
+  { label: 'Master', name: 'Master', fn: (n) => Math.max(1, Math.round(n * 0.75)) },
+];
+
+function bpQuizBeatCount() {
+  const talam = BP_TALAMS[bpTalamIdx];
+  return BP_INTENSITIES[bpIntensityIdx].fn(talam.beats);
+}
+
+// Game state
+let bpTalamIdx    = 0;
+let bpIntensityIdx = 0;
+let bpTempo       = 80;
+let bpQuizBeats   = [];
+let bpSelected    = new Set();
+let bpSubmitted   = false;
+let bpSeqPlaying  = false;
+
+// ── Audio: three distinct sounds ──
+// normalClick: soft tick for unaccented beats
+// accentClick: louder woodblock for accented beats
+// quizClick: a muted/different tone for the quiz beat(s)
+
+function bpPlayClick(t) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.connect(g); g.connect(masterOut);
+  osc.type = 'sine';
+  osc.frequency.value = 600;
+  g.gain.setValueAtTime(0.08, t);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.04);
+  osc.start(t); osc.stop(t + 0.05);
+}
+
+function bpPlayQuizClick(t) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const g = ctx.createGain();
+  osc.connect(g); g.connect(masterOut);
+  osc.type = 'triangle';
+  osc.frequency.value = 1400;
+  g.gain.setValueAtTime(0.0, t);
+  g.gain.linearRampToValueAtTime(0.45, t + 0.008);
+  g.gain.exponentialRampToValueAtTime(0.001, t + 0.28);
+  osc.start(t); osc.stop(t + 0.3);
+}
+
+// ── Setup UI ──
+(function buildBpSetup() {
+  const tg = document.getElementById('bpTalamGrid');
+  BP_TALAMS.forEach((talam, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+    btn.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--cream)">${talam.name}</div>
+                     <div style="font-size:11px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px">${talam.description}</div>`;
+    btn.onclick = () => {
+      tg.querySelectorAll('.varisai-item').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      bpTalamIdx = i;
+    };
+    tg.appendChild(btn);
+  });
+
+  const lp = document.getElementById('bpLevelPicker');
+  BP_INTENSITIES.forEach((intensity, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'shruti-btn' + (i === 0 ? ' selected' : '');
+    btn.style.cssText = 'min-width:80px; padding:12px 10px;';
+    btn.innerHTML = `<div style="font-size:16px;font-weight:700">${intensity.label}</div>`;
+    btn.onclick = () => {
+      lp.querySelectorAll('.shruti-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      bpIntensityIdx = i;
+    };
+    lp.appendChild(btn);
+  });
+})();
+
+// ── Generate quiz beats for a round ──
+function bpGenerateQuizBeats() {
+  const talam = BP_TALAMS[bpTalamIdx];
+  const count = bpQuizBeatCount();
+  const allBeats = Array.from({length: talam.beats}, (_, i) => i + 1);
+  const shuffled = allBeats.sort(() => Math.random() - 0.5);
+  bpQuizBeats = shuffled.slice(0, count).sort((a,b) => a - b);
+}
+
+// ── Build beat visualizer row ──
+function bpBuildBeatRow() {
+  const talam = BP_TALAMS[bpTalamIdx];
+  const row = document.getElementById('bpBeatRow');
+  row.innerHTML = '';
+  for (let i = 1; i <= talam.beats; i++) {
+    const dot = document.createElement('div');
+    dot.id = 'bpdot-' + i;
+    dot.style.cssText = `
+      width: 36px; height: 36px; border-radius: 50%;
+      border: 2px solid var(--border); background: var(--surface2);
+      transition: all 0.15s;
+    `;
+    row.appendChild(dot);
+  }
+}
+
+// ── Build answer grid (numbered beat buttons) ──
+function bpBuildAnswerGrid() {
+  const talam = BP_TALAMS[bpTalamIdx];
+  const grid = document.getElementById('bpAnswerGrid');
+  grid.innerHTML = '';
+  for (let i = 1; i <= talam.beats; i++) {
+    const btn = document.createElement('button');
+    btn.id = 'bpbtn-' + i;
+    btn.style.cssText = `
+      width:52px; height:52px; border-radius:50%;
+      border: 2px solid var(--border); background: var(--surface2);
+      color: var(--cream); font-size: 17px; font-weight: 700;
+      cursor: pointer; transition: all 0.15s;
+    `;
+    btn.textContent = i;
+    btn.onmouseover = () => { if (!btn.disabled && !btn.classList.contains('bp-sel')) btn.style.borderColor = 'var(--gold)'; };
+    btn.onmouseout  = () => { if (!btn.disabled && !btn.classList.contains('bp-sel')) btn.style.borderColor = 'var(--border)'; };
+    btn.onclick = () => bpToggleAnswer(i);
+    grid.appendChild(btn);
+  }
+}
+
+function bpToggleAnswer(beat) {
+  if (bpSubmitted) return;
+  const btn = document.getElementById('bpbtn-' + beat);
+  if (bpSelected.has(beat)) {
+    bpSelected.delete(beat);
+    btn.classList.remove('bp-sel');
+    btn.style.borderColor = 'var(--border)';
+    btn.style.background = 'var(--surface2)';
+    btn.style.color = 'var(--cream)';
+  } else {
+    // Enforce max selections = bpQuizBeatCount()
+    if (bpSelected.size >= bpQuizBeatCount()) return;
+    bpSelected.add(beat);
+    btn.classList.add('bp-sel');
+    btn.style.borderColor = 'var(--gold)';
+    btn.style.background = 'rgba(201,148,58,0.18)';
+    btn.style.color = 'var(--gold-light)';
+  }
+  // Update submit button hint
+  const remaining = bpQuizBeatCount() - bpSelected.size;
+  document.getElementById('bpSubmitBtn').textContent =
+    remaining > 0 ? `Select ${remaining} more` : 'Submit Answer';
+  document.getElementById('bpSubmitBtn').disabled = remaining > 0;
+}
+
+// ── Play the talam sequence ──
+function bpPlaySequence() {
+  if (bpSeqPlaying) return;
+  bpSeqPlaying = true;
+  const btn = document.getElementById('bpPlayBtn');
+  btn.disabled = true;
+  btn.textContent = '♩ Playing…';
+
+  const talam = BP_TALAMS[bpTalamIdx];
+  const ctx = getAudioCtx();
+  const beatDur = 60 / bpTempo; // seconds per beat
+  // Play 2 full cycles so the pattern is clear
+  const cycles = 2;
+  const totalBeats = talam.beats * cycles;
+
+  for (let cycle = 0; cycle < cycles; cycle++) {
+    for (let i = 1; i <= talam.beats; i++) {
+      const t = ctx.currentTime + (cycle * talam.beats + (i - 1)) * beatDur;
+      if (bpQuizBeats.includes(i)) {
+        bpPlayQuizClick(t);
+      } else {
+        bpPlayClick(t);
+      }
+    }
+  }
+
+  const totalDur = totalBeats * beatDur * 1000;
+  setTimeout(() => {
+    bpSeqPlaying = false;
+    btn.disabled = false;
+    btn.textContent = '▶ Play Again';
+  }, totalDur + 200);
+}
+
+// ── Start game ──
+function bpStart() {
+  bpTempo = parseInt(document.getElementById('bpTempoSlider').value);
+  bpSelected = new Set(); bpSubmitted = false;
+  document.getElementById('bpSetup').style.display = 'none';
+  document.getElementById('bpPlay').style.display = 'block';
+  bpBeginRound();
+}
+
+function bpBeginRound() {
+  bpSelected = new Set(); bpSubmitted = false;
+  bpGenerateQuizBeats();
+  const talam = BP_TALAMS[bpTalamIdx];
+  const beatCount = bpQuizBeatCount();
+
+  document.getElementById('bpRoundInfo').textContent =
+    `${talam.name}  ·  ${BP_INTENSITIES[bpIntensityIdx].label} — identify ${beatCount} beat${beatCount > 1 ? 's' : ''}`;
+  document.getElementById('bpAnswerCount').textContent = beatCount;
+  document.getElementById('bpAnswerPlural').textContent = beatCount > 1 ? 's' : '';
+  document.getElementById('bpFeedback').style.display = 'none';
+  document.getElementById('bpNextBtn').style.display = 'none';
+  document.getElementById('bpSubmitBtn').style.display = 'inline-block';
+  document.getElementById('bpSubmitBtn').textContent = beatCount > 1 ? `Select ${beatCount} beats` : 'Submit Answer';
+  document.getElementById('bpSubmitBtn').disabled = true;
+  document.getElementById('bpPlayBtn').textContent = '▶ Play Talam';
+  document.getElementById('bpPlayBtn').disabled = false;
+
+  bpBuildBeatRow();
+  bpBuildAnswerGrid();
+  setTimeout(bpPlaySequence, 500);
+}
+
+// ── Submit ──
+function bpSubmit() {
+  const beatCount = bpQuizBeatCount();
+  if (bpSubmitted || bpSelected.size < beatCount) return;
+  bpSubmitted = true;
+
+  const selected = [...bpSelected].sort((a,b) => a-b);
+  const correct  = bpQuizBeats;
+  const exact    = selected.length === correct.length && selected.every((v,i) => v === correct[i]);
+
+  // Colour answer buttons
+  for (let i = 1; i <= BP_TALAMS[bpTalamIdx].beats; i++) {
+    const btn = document.getElementById('bpbtn-' + i);
+    if (!btn) continue;
+    const isCorrect  = correct.includes(i);
+    const isSelected = bpSelected.has(i);
+    btn.disabled = true;
+    if (isCorrect && isSelected)   { btn.style.borderColor='var(--gold)';   btn.style.background='rgba(201,148,58,0.25)'; btn.style.color='var(--gold-light)'; }
+    else if (isCorrect)             { btn.style.borderColor='#6ab';          btn.style.background='rgba(80,160,180,0.2)';  btn.style.color='#aee'; }
+    else if (isSelected)            { btn.style.borderColor='var(--red)';    btn.style.background='rgba(192,58,42,0.2)';  btn.style.color='#e06050'; }
+  }
+
+  // Reveal beat numbers on dots
+  for (let i = 1; i <= BP_TALAMS[bpTalamIdx].beats; i++) {
+    const dot = document.getElementById('bpdot-' + i);
+    if (!dot) continue;
+    dot.style.display = 'flex';
+    dot.style.alignItems = 'center';
+    dot.style.justifyContent = 'center';
+    dot.style.fontSize = '13px';
+    dot.style.fontWeight = '600';
+    dot.textContent = i;
+    if (correct.includes(i)) {
+      dot.style.background = 'rgba(80,160,180,0.25)';
+      dot.style.borderColor = '#6ab';
+      dot.style.color = '#aee';
+    } else {
+      dot.style.color = 'var(--cream-dim)';
+    }
+  }
+
+  // Feedback
+  const multi = beatCount > 1;
+  const fb = document.getElementById('bpFeedback');
+  fb.style.display = 'block';
+  if (exact) {
+    fb.innerHTML = `<span style="color:var(--gold-light);font-weight:600;">✦ Correct!</span>
+      The quiz beat${multi ? 's were' : ' was'} <strong style="color:var(--gold-light)">${correct.join(', ')}</strong>.`;
+  } else {
+    fb.innerHTML = `<span style="color:#e06050;font-weight:600;">✗ Not quite.</span>
+      The quiz beat${multi ? 's were' : ' was'} <strong style="color:var(--gold-light)">${correct.join(', ')}</strong>.
+      You selected <strong style="color:#e06050">${selected.join(', ')}</strong>.`;
+  }
+
+  document.getElementById('bpSubmitBtn').style.display = 'none';
+  document.getElementById('bpNextBtn').style.display = 'inline-block';
+}
+
+function bpQuit() {
+  bpSeqPlaying = false;
+  document.getElementById('bpPlay').style.display = 'none';
+  document.getElementById('bpSetup').style.display = 'block';
 }
 
 

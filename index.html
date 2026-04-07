@@ -1,0 +1,2850 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Svara — Carnatic Practice Companion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700;800&family=Nunito:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #0e2233;
+    --bg2:       #122840;
+    --surface:   #163348;
+    --surface2:  #1c3f58;
+    --teal:      #0ea5a0;
+    --teal-light:#2dd4cf;
+    --teal-dim:  #0a6e6a;
+    --saffron:   #f97316;
+    --saffron-light: #fb923c;
+    --yellow:    #fbbf24;
+    --yellow-light: #fde68a;
+    --coral:     #f43f5e;
+    --coral-light: #fb7185;
+    --green:     #22c55e;
+    --green-light: #4ade80;
+    --cream:     #fef3e2;
+    --cream-dim: #94a3b8;
+    --border:    rgba(14,165,160,0.3);
+    --border-bright: rgba(14,165,160,0.7);
+    --gold:      #fbbf24;
+    --gold-light: #fde68a;
+    --gold-dim:  #92650a;
+    --amber:     #f97316;
+    --red:       #f43f5e;
+    --font-display: 'Baloo 2', sans-serif;
+    --font-body:    'Nunito', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* BACKGROUND — layered radial glows instead of grid lines */
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background:
+      radial-gradient(ellipse 70% 50% at 80% 10%, rgba(249,115,22,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 50% at 10% 80%, rgba(14,165,160,0.14) 0%, transparent 60%),
+      radial-gradient(ellipse 50% 40% at 50% 50%, rgba(251,191,36,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* remove old ornamental border */
+  body::after { display: none; }
+
+  /* HEADER */
+  header {
+    position: relative; z-index: 1;
+    text-align: center;
+    padding: 40px 24px 32px;
+    border-bottom: 2px solid var(--border);
+    background: linear-gradient(180deg, rgba(14,165,160,0.08) 0%, transparent 100%);
+  }
+
+  .header-ornament {
+    color: var(--teal-light);
+    font-size: 13px;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: flex; align-items: center; justify-content: center; gap: 12px;
+    font-family: var(--font-body);
+    font-weight: 600;
+  }
+  .header-ornament::before, .header-ornament::after {
+    content: '🎵';
+    font-size: 16px;
+    letter-spacing: 0;
+  }
+
+  h1 {
+    font-family: var(--font-display);
+    font-size: clamp(32px, 6vw, 56px);
+    font-weight: 800;
+    color: var(--yellow);
+    letter-spacing: 2px;
+    text-shadow: 0 0 40px rgba(251,191,36,0.5), 0 4px 0 rgba(0,0,0,0.3);
+    margin-bottom: 6px;
+  }
+
+  .subtitle {
+    color: var(--teal-light);
+    font-size: 16px;
+    font-weight: 600;
+    letter-spacing: 1px;
+  }
+
+  /* NAV TABS */
+  nav {
+    position: relative; z-index: 1;
+    display: flex;
+    justify-content: center;
+    gap: 4px;
+    padding: 12px 16px;
+    border-bottom: 2px solid var(--border);
+    background: rgba(18,40,64,0.95);
+    flex-wrap: wrap;
+  }
+
+  nav button {
+    background: rgba(28,63,88,0.6);
+    border: 2px solid transparent;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--cream-dim);
+    padding: 8px 18px;
+    transition: all 0.2s;
+  }
+  nav button:hover {
+    color: var(--cream);
+    border-color: var(--teal-dim);
+    background: rgba(14,165,160,0.1);
+  }
+  nav button.active {
+    background: linear-gradient(135deg, var(--teal), var(--teal-dim));
+    border-color: var(--teal-light);
+    color: var(--cream);
+    box-shadow: 0 2px 12px rgba(14,165,160,0.4);
+  }
+  nav button.active::after { display: none; }
+
+  /* MAIN CONTENT */
+  main {
+    position: relative; z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 20px 80px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* CARD */
+  .card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .card::before {
+    content: '';
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+    background: linear-gradient(90deg, var(--teal), var(--saffron), var(--yellow));
+    border-radius: 16px 16px 0 0;
+  }
+
+  .card-title {
+    font-family: var(--font-display);
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--yellow);
+    margin-bottom: 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .card-title::after {
+    content: '';
+    flex: 1; height: 2px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    border-radius: 2px;
+  }
+
+  /* BUTTONS */
+  .btn {
+    background: rgba(28,63,88,0.8);
+    border: 2px solid var(--teal-dim);
+    color: var(--teal-light);
+    font-family: var(--font-body);
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 10px 24px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 10px;
+  }
+  .btn:hover {
+    border-color: var(--teal-light);
+    background: rgba(14,165,160,0.15);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(14,165,160,0.25);
+  }
+  .btn.primary {
+    background: linear-gradient(135deg, var(--saffron), #ea580c);
+    border-color: var(--saffron-light);
+    color: #fff;
+    box-shadow: 0 3px 12px rgba(249,115,22,0.35);
+  }
+  .btn.primary:hover {
+    background: linear-gradient(135deg, var(--saffron-light), var(--saffron));
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(249,115,22,0.45);
+  }
+  .btn.danger { border-color: var(--coral); color: var(--coral-light); }
+  .btn.danger:hover { background: rgba(244,63,94,0.15); border-color: var(--coral-light); }
+
+  /* SHRUTI / TANPURA */
+  .shruti-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(52px, 1fr));
+    gap: 8px;
+    margin: 16px 0;
+  }
+
+  .shruti-btn {
+    background: var(--surface2);
+    border: 2px solid rgba(14,165,160,0.2);
+    color: var(--cream-dim);
+    font-family: var(--font-body);
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: center;
+    border-radius: 10px;
+  }
+  .shruti-btn:hover { border-color: var(--teal); color: var(--teal-light); }
+  .shruti-btn.selected {
+    background: rgba(14,165,160,0.2);
+    border-color: var(--teal-light);
+    color: var(--teal-light);
+    box-shadow: 0 0 10px rgba(14,165,160,0.3) inset;
+  }
+
+  .tanpura-visual {
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 12px;
+    height: 120px;
+    margin: 20px 0;
+  }
+
+  .string-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    max-width: 70px;
+  }
+
+  .string {
+    width: 4px;
+    background: linear-gradient(180deg, var(--yellow), var(--saffron));
+    border-radius: 3px;
+    transition: height 0.5s ease, box-shadow 0.5s ease;
+    cursor: pointer;
+    position: relative;
+  }
+  .string.playing {
+    box-shadow: 0 0 10px 3px rgba(249,115,22,0.7);
+    animation: pluck 0.6s ease-out;
+  }
+  @keyframes pluck {
+    0% { transform: scaleX(1); }
+    20% { transform: scaleX(4); }
+    100% { transform: scaleX(1); }
+  }
+
+  .string-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--cream-dim);
+    text-align: center;
+  }
+
+  .tempo-control {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .tempo-display {
+    font-family: var(--font-display);
+    font-size: 48px;
+    font-weight: 800;
+    color: var(--yellow);
+    text-shadow: 0 0 20px rgba(251,191,36,0.4);
+    min-width: 120px;
+    text-align: center;
+  }
+
+  .tempo-unit {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cream-dim);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  input[type=range] {
+    -webkit-appearance: none;
+    width: 100%;
+    height: 6px;
+    background: linear-gradient(90deg, var(--teal), var(--surface2));
+    border-radius: 4px;
+    outline: none;
+    margin: 12px 0;
+    cursor: pointer;
+  }
+  input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 22px; height: 22px;
+    background: var(--yellow);
+    border-radius: 50%;
+    box-shadow: 0 0 8px rgba(251,191,36,0.6);
+    border: 3px solid #fff;
+  }
+
+  /* TIMER */
+  .timer-display {
+    font-family: var(--font-display);
+    font-size: 72px;
+    font-weight: 800;
+    text-align: center;
+    color: var(--yellow);
+    text-shadow: 0 0 30px rgba(251,191,36,0.5);
+    letter-spacing: 2px;
+    padding: 20px 0;
+    line-height: 1;
+  }
+
+  .timer-progress {
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    margin: 16px 0;
+    overflow: hidden;
+  }
+  .timer-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--coral), var(--saffron), var(--yellow));
+    border-radius: 4px;
+    transition: width 1s linear;
+    width: 0%;
+  }
+
+  .varisai-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .varisai-item {
+    background: var(--surface2);
+    border: 2px solid rgba(14,165,160,0.2);
+    padding: 14px 16px;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 12px;
+  }
+  .varisai-item:hover { border-color: var(--teal); transform: translateY(-1px); }
+  .varisai-item.selected {
+    background: rgba(14,165,160,0.15);
+    border-color: var(--teal-light);
+    box-shadow: 0 2px 10px rgba(14,165,160,0.2);
+  }
+  .varisai-name {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-bottom: 4px;
+  }
+  .varisai-pattern {
+    font-size: 12px;
+    color: var(--cream-dim);
+    font-family: monospace;
+    letter-spacing: 1px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 16px;
+  }
+  thead th {
+    text-align: left;
+    padding: 12px 16px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--teal-light);
+    border-bottom: 2px solid var(--border);
+  }
+  tbody tr {
+    border-bottom: 1px solid rgba(14,165,160,0.1);
+    transition: background 0.2s;
+  }
+  tbody tr:hover { background: rgba(14,165,160,0.05); }
+  tbody td { padding: 14px 16px; color: var(--cream-dim); }
+  tbody td:first-child { color: var(--cream); }
+  .rank-gold { color: var(--yellow) !important; font-weight: 700; }
+
+  .rank-badge {
+    display: inline-block;
+    width: 28px; height: 28px;
+    line-height: 28px;
+    text-align: center;
+    border-radius: 50%;
+    font-size: 13px;
+    font-weight: 700;
+    margin-right: 8px;
+  }
+  .rank-badge.r1 { background: rgba(251,191,36,0.2); color: var(--yellow); border: 2px solid var(--yellow); }
+  .rank-badge.r2 { background: rgba(148,163,184,0.2); color: #cbd5e1; border: 2px solid #94a3b8; }
+  .rank-badge.r3 { background: rgba(249,115,22,0.2); color: var(--saffron-light); border: 2px solid var(--saffron); }
+
+  .pulse-dot {
+    display: inline-block;
+    width: 10px; height: 10px;
+    background: var(--saffron);
+    border-radius: 50%;
+    margin-right: 8px;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+  @keyframes floatUp {
+    0%   { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+    100% { opacity: 0; transform: translateX(-50%) translateY(-60px) scale(1.4); }
+  }
+  .score-pop {
+    position: absolute; left: 50%;
+    font-family: var(--font-display); font-size: 26px; font-weight: 800;
+    color: var(--yellow); pointer-events: none;
+    animation: floatUp 0.95s ease-out forwards;
+    white-space: nowrap;
+    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    z-index: 999;
+  }
+  @keyframes confettiFall {
+    0%   { transform: translateY(0) rotate(0deg) scale(1); opacity: 1; }
+    100% { transform: translateY(120px) rotate(720deg) scale(0.4); opacity: 0; }
+  }
+  .confetti-piece {
+    position: fixed; width: 10px; height: 10px;
+    border-radius: 2px; pointer-events: none; z-index: 9999;
+    animation: confettiFall linear forwards;
+  }
+  @keyframes bigWin {
+    0%   { transform: scale(0.5); opacity: 0; }
+    40%  { transform: scale(1.2); opacity: 1; }
+    70%  { transform: scale(0.95); }
+    100% { transform: scale(1); opacity: 0; }
+  }
+  .big-win-msg {
+    position: fixed; top: 38%; left: 50%; transform: translateX(-50%);
+    font-family: var(--font-display); font-size: clamp(28px, 7vw, 52px);
+    font-weight: 800; color: var(--yellow);
+    text-shadow: 0 0 30px rgba(251,191,36,0.8), 0 4px 0 rgba(0,0,0,0.4);
+    pointer-events: none; z-index: 9999; white-space: nowrap;
+    animation: bigWin 1.1s ease-out forwards;
+  }
+  .level-card {
+    padding: 14px 16px; border: 2px solid rgba(14,165,160,0.2); background: var(--surface2);
+    cursor: pointer; transition: all 0.2s; border-radius: 12px;
+  }
+  .level-card:hover { border-color: var(--teal); transform: translateY(-1px); }
+  .level-card.selected {
+    border-color: var(--teal-light); background: rgba(14,165,160,0.15);
+    box-shadow: 0 2px 12px rgba(14,165,160,0.25);
+  }
+
+  .metronome-beat {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 16px 0;
+  }
+  .beat-dot {
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    transition: all 0.05s;
+  }
+  .beat-dot.active {
+    background: var(--saffron);
+    box-shadow: 0 0 14px rgba(249,115,22,0.8);
+    border-color: var(--saffron-light);
+  }
+  .beat-dot.akshara {
+    width: 18px; height: 18px;
+    border-color: var(--teal-dim);
+  }
+  .beat-dot.akshara.active {
+    background: var(--teal);
+    box-shadow: 0 0 16px rgba(14,165,160,0.9);
+  }
+
+  .tags {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px;
+  }
+  .tag {
+    padding: 4px 12px;
+    border: 2px solid var(--border);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--cream-dim);
+    border-radius: 20px;
+    background: var(--surface2);
+  }
+
+  .info-text {
+    color: var(--cream-dim);
+    font-size: 15px;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 600px) { .two-col { grid-template-columns: 1fr; } }
+
+  .divider {
+    text-align: center;
+    color: var(--teal-dim);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    margin: 8px 0 20px;
+  }
+
+  .status-bar {
+    display: flex; align-items: center; gap: 16px;
+    padding: 12px 16px;
+    background: rgba(14,165,160,0.08);
+    border: 2px solid var(--border);
+    border-radius: 10px;
+    margin-top: 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--cream-dim);
+  }
+  .status-on { color: var(--teal-light); }
+
+  select {
+    background: var(--surface2);
+    border: 2px solid var(--border);
+    color: var(--cream);
+    font-family: var(--font-body);
+    font-size: 16px;
+    font-weight: 600;
+    padding: 10px 14px;
+    outline: none;
+    cursor: pointer;
+    border-radius: 10px;
+  }
+
+  .btn-row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  /* GLOBAL TANPURA BAR */
+  #tanpuraBar {
+    position: relative; z-index: 2;
+    background: var(--surface);
+    border-bottom: 2px solid var(--border);
+    padding: 10px 24px;
+  }
+  .tanpura-bar-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  .tanpura-bar-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .tanpura-bar-strings {
+    display: flex;
+    align-items: flex-end;
+    gap: 5px;
+    height: 36px;
+  }
+  .tanpura-bar-strings .string-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 3px;
+  }
+  .tanpura-bar-strings .string {
+    width: 3px;
+    background: linear-gradient(180deg, var(--yellow), var(--saffron));
+    border-radius: 2px;
+    transition: box-shadow 0.5s ease;
+  }
+  .tanpura-bar-strings .string-label {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--cream-dim);
+    letter-spacing: 0.5px;
+  }
+  .tanpura-bar-controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-ornament">Carnatic Practice Companion</div>
+  <h1>Svara</h1>
+  <p class="subtitle">स्वर — Cultivate your voice, sharpen your rhythm</p>
+</header>
+
+<nav>
+  <button class="active" onclick="switchTab('shruti')">🎵 Shruti & Tanpura</button>
+  <button onclick="switchTab('varisai')">⏱ Varisai Drills</button>
+  <button onclick="switchTab('game')">🎯 Swarasthanam</button>
+  <button onclick="switchTab('ragagame')">🎼 Guess the Ragam</button>
+  <button onclick="switchTab('shadow')">⚡ Shadowing</button>
+</nav>
+
+<!-- GLOBAL TANPURA BAR -->
+<div id="tanpuraBar">
+  <div class="tanpura-bar-inner">
+    <div class="tanpura-bar-left">
+      <div id="tanpuraVisual" class="tanpura-bar-strings"></div>
+      <div>
+        <div style="font-size:11px; letter-spacing:3px; text-transform:uppercase; color:var(--gold-dim); margin-bottom:2px;">Tanpura</div>
+        <div id="tanpuraStatus" style="font-size:13px; color:var(--cream-dim); font-style:italic; min-width:90px;">Off</div>
+      </div>
+    </div>
+    <div class="tanpura-bar-controls">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:11px; letter-spacing:1px; color:var(--gold-dim); text-transform:uppercase;">Vol</span>
+        <input type="range" id="volumeSlider" min="0" max="100" value="70" oninput="updateDroneVolume(this.value)" style="width:90px;">
+      </div>
+      <button class="btn primary" id="tanpuraBtn" onclick="toggleTanpura()" style="padding:8px 20px; font-size:13px; letter-spacing:2px; white-space:nowrap;">▶ Start</button>
+    </div>
+  </div>
+  <div style="text-align:center; padding:5px 24px 6px; font-size:12px; color:var(--cream-dim); font-style:italic;">
+    💡 Feel free to also play your own shruti box if you don't like the sound of the tanpura!
+  </div>
+</div>
+
+<main>
+  <!-- ═══════════════════════════════════════════════
+       TAB 1: SHRUTI & TANPURA
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-shruti" class="tab-panel active">
+
+    <div class="card">
+      <div class="card-title">Shruti Selection</div>
+      <p class="info-text">Select your base pitch (Sa). The tanpura and swarasthanam will update accordingly.</p>
+      <div class="shruti-grid" id="shrutiGrid"></div>
+      <div class="status-bar">
+        <span>Selected Sa:</span>
+        <span class="status-on" id="shrutiStatus">C</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Practice Swarasthanam</div>
+      <p class="info-text">Click any swaram to hear it against your selected Sa. Use this to tune your voice or instrument.</p>
+      <div id="swaraGrid" style="margin-top:20px;"></div>
+      <div class="status-bar" style="margin-top:16px;">
+        <span>Playing:</span>
+        <span class="status-on" id="swaraStatus">—</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ═══════════════════════════════════════════════
+       TAB 2: VARISAI DRILLS
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-varisai" class="tab-panel">
+
+    <div class="card">
+      <div class="card-title">Select Raga</div>
+      <p class="info-text" style="margin-bottom:18px;">Choose a raga — this sets the exact swarasthana pitches for all exercises.</p>
+      <div id="ragaGrid" style="display:grid; grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); gap:10px;"></div>
+      <div class="status-bar" style="margin-top:16px;">
+        <span>Selected:</span>
+        <span class="status-on" id="ragaStatus">Mayamalavagowlai</span>
+        <span style="margin-left:auto; font-size:12px; color:var(--cream-dim); font-style:italic;" id="ragaScale"></span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Select Exercise</div>
+      <div class="varisai-list" id="varisaiList"></div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Metronome & Timer</div>
+
+      <div style="margin-bottom:20px;">
+        <div style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim); margin-bottom:10px;">Sequence — Adi Tala</div>
+        <div id="noteDisplay" style="overflow-x:auto; white-space:nowrap; padding:4px 0 10px; min-height:44px;"></div>
+      </div>
+
+      <div style="margin-bottom:24px;">
+        <label style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Tempo (BPM)</label>
+        <div style="display:flex; align-items:center; gap:20px; margin-top:8px; flex-wrap:wrap;">
+          <div>
+            <div class="tempo-display" id="tempoDisplay">80</div>
+            <div class="tempo-unit">beats / min</div>
+          </div>
+          <div style="flex:1; min-width:180px;">
+            <input type="range" id="tempoSlider" min="40" max="600" value="80" oninput="updateTempo(this.value)">
+            <div style="display:flex; justify-content:space-between; font-size:12px; color:var(--cream-dim);">
+              <span>40</span><span>Vilamba</span><span>Madhyama</span><span>Druta</span><span>600</span>
+            </div>
+          </div>
+          <div>
+            <div class="metronome-beat" id="beatVisual" style="justify-content:flex-start;"></div>
+            <div style="font-size:11px; color:var(--cream-dim); text-align:center; margin-top:4px; letter-spacing:1px;">Adi Tala</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="margin-top:8px;">
+        <label style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Practice Timer</label>
+        <div class="timer-display" id="timerDisplay">05:00</div>
+        <div class="timer-progress"><div class="timer-progress-fill" id="timerFill"></div></div>
+        <div style="display:flex; gap:12px; margin-bottom:16px;">
+          <label style="font-size:12px; letter-spacing:1px; color:var(--cream-dim);">Duration:</label>
+          <select id="durationSelect" style="font-size:14px; padding:4px 10px;">
+            <option value="60">1 min</option>
+            <option value="120">2 min</option>
+            <option value="300" selected>5 min</option>
+            <option value="600">10 min</option>
+          </select>
+        </div>
+        <div class="btn-row">
+          <button class="btn primary" id="metronomeBtn" onclick="toggleMetronome()">▶ Start</button>
+          <button class="btn" onclick="resetTimer()">↺ Reset</button>
+          <div id="drillStatus" style="font-size:14px; color:var(--cream-dim); font-style:italic; margin-left:8px;"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 3: SWARASTHANAM GAME
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-game" class="tab-panel">
+    <div id="gameSetup">
+      <div class="card">
+        <div class="card-title">🎯 Swarasthanam</div>
+        <p class="info-text" style="margin-bottom:24px;">Hear a note (or sequence) and identify it. Pick your level — start easy and work up!</p>
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:12px;">Raga</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;" id="gameRagaGrid"></div>
+        </div>
+        <div style="margin-bottom:28px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:14px;">Level</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;" id="gameLevelGrid"></div>
+        </div>
+        <button class="btn primary" onclick="startGame()" style="font-size:16px;padding:14px 36px;">✦ Play!</button>
+      </div>
+    </div>
+    <div id="gamePlay" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:13px;color:var(--cream-dim);letter-spacing:1px;" id="gameLevelLabel"></div>
+          <div style="display:flex;gap:20px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Streak</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="gameStreak">0</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Score</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="gameScore">0</div>
+            </div>
+          </div>
+        </div>
+        <div id="gameSeqDisplay" style="display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;min-height:56px;align-items:center;"></div>
+        <div style="text-align:center;margin-bottom:20px;">
+          <button class="btn primary" id="gamePlayBtn" onclick="playGameSequence()">▶ Play Note</button>
+        </div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:10px;" id="gameAnswerLabel"></div>
+        <div id="gameAnswerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px;"></div>
+        <div id="gameFeedback" style="min-height:36px;font-size:18px;font-style:italic;color:var(--gold-light);text-align:center;padding:6px 0;position:relative;overflow:visible;"></div>
+        <div class="btn-row" style="margin-top:12px;justify-content:center;">
+          <button class="btn danger" onclick="endGame()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 4: GUESS THE RAGAM
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-ragagame" class="tab-panel">
+    <div id="rgSetup">
+      <div class="card">
+        <div class="card-title">🎼 Guess the Ragam</div>
+        <p class="info-text" style="margin-bottom:24px;">Listen to a sequence of notes and identify which raga it belongs to.</p>
+        <div style="margin-bottom:28px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:14px;">Level</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;" id="rgLevelGrid"></div>
+        </div>
+        <button class="btn primary" onclick="rgStart()" style="font-size:16px;padding:14px 36px;">✦ Play!</button>
+      </div>
+    </div>
+    <div id="rgPlay" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:13px;color:var(--cream-dim);letter-spacing:1px;" id="rgLevelLabel"></div>
+          <div style="display:flex;gap:20px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Streak</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="rgStreak">0</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Score</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="rgScore">0</div>
+            </div>
+          </div>
+        </div>
+        <div id="rgSeqDisplay" style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-bottom:20px;min-height:48px;align-items:center;"></div>
+        <div style="text-align:center;margin-bottom:24px;">
+          <button class="btn primary" id="rgPlayBtn" onclick="rgPlaySequence()">▶ Play Sequence</button>
+        </div>
+        <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:12px;" id="rgInstruction"></div>
+        <div id="rgChoices" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-bottom:20px;"></div>
+        <div id="rgHint" style="font-size:13px;color:var(--cream-dim);font-style:italic;text-align:center;margin-bottom:12px;min-height:18px;"></div>
+        <div style="text-align:center;margin-bottom:12px;">
+          <button class="btn primary" id="rgSubmitBtn" onclick="rgSubmit()" style="display:none;">Submit Answer</button>
+        </div>
+        <div id="rgFeedback" style="display:none;padding:14px;border:1px solid var(--border);background:var(--surface2);margin-bottom:16px;font-size:14px;"></div>
+        <div class="btn-row" style="justify-content:center;gap:16px;">
+          <button class="btn primary" id="rgNextBtn" style="display:none;" onclick="rgNext()">▶ Next</button>
+          <button class="btn danger" onclick="rgQuit()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 5: SWARAM SHADOWING
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-shadow" class="tab-panel">
+    <div id="ssSetup">
+      <div class="card">
+        <div class="card-title">⚡ Swaram Shadowing</div>
+        <p class="info-text" style="margin-bottom:24px;">Hear a note and tap it! Early levels give you a visual hint — later levels are pure listening.</p>
+        <div style="margin-bottom:20px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:12px;">Raga</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;" id="ssRagaGrid"></div>
+        </div>
+        <div style="margin-bottom:28px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:14px;">Level</div>
+          <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px;" id="ssLevelGrid"></div>
+        </div>
+        <button class="btn primary" onclick="ssStart()" style="font-size:16px;padding:14px 36px;">✦ Play!</button>
+      </div>
+    </div>
+    <div id="ssPlay" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
+          <div style="font-size:13px;color:var(--cream-dim);letter-spacing:1px;" id="ssLevelLabel"></div>
+          <div style="display:flex;gap:20px;align-items:center;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Lives</div>
+              <div style="font-size:22px;letter-spacing:3px;" id="ssLivesDisplay">♥♥♥</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Streak</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="ssStreak">0</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Score</div>
+              <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="ssScore">0</div>
+            </div>
+          </div>
+        </div>
+        <div id="ssNoteDisplay" style="font-family:var(--font-display);font-size:52px;color:var(--cream-dim);text-align:center;min-height:72px;line-height:72px;margin-bottom:8px;transition:all 0.2s;">—</div>
+        <div id="ssNoteSub" style="font-size:13px;color:var(--cream-dim);letter-spacing:2px;text-align:center;min-height:20px;margin-bottom:12px;"></div>
+        <div style="margin-bottom:20px;">
+          <div style="height:8px;background:var(--surface2);border:1px solid var(--border);border-radius:4px;overflow:hidden;">
+            <div id="ssTimerBar" style="height:100%;background:var(--gold);width:100%;transition:width linear;"></div>
+          </div>
+        </div>
+        <div id="ssAnswerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px;"></div>
+        <div id="ssFeedback" style="text-align:center;font-size:18px;min-height:28px;font-style:italic;color:var(--gold-light);transition:opacity 0.3s;position:relative;overflow:visible;"></div>
+        <div class="btn-row" style="justify-content:center;margin-top:16px;">
+          <button class="btn danger" onclick="ssQuit()">✕ Quit</button>
+        </div>
+      </div>
+    </div>
+    <div id="ssOver" style="display:none;">
+      <div class="card" style="text-align:center;">
+        <div class="card-title">Nice work! 🎉</div>
+        <div style="font-family:var(--font-display);font-size:64px;color:var(--gold-light);text-shadow:0 0 40px rgba(201,148,58,0.5);margin:16px 0;" id="ssFinalScore"></div>
+        <div style="font-size:16px;color:var(--cream-dim);font-style:italic;margin-bottom:8px;" id="ssFinalMsg"></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:360px;margin:20px auto;">
+          <div><div style="font-size:11px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Level</div><div style="font-family:var(--font-display);font-size:28px;color:var(--gold-light);" id="ssFinalLevel"></div></div>
+          <div><div style="font-size:11px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Best Streak</div><div style="font-family:var(--font-display);font-size:28px;color:var(--gold-light);" id="ssFinalStreak"></div></div>
+          <div><div style="font-size:11px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Accuracy</div><div style="font-family:var(--font-display);font-size:28px;color:var(--gold-light);" id="ssFinalAccuracy"></div></div>
+        </div>
+        <div class="btn-row" style="justify-content:center;gap:16px;">
+          <button class="btn primary" onclick="ssReset()">Play Again</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+</main>
+
+<script>
+// ═══════════════════════════════════
+// TAB NAVIGATION
+// ═══════════════════════════════════
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ═══════════════════════════════════
+// AUDIO CONTEXT
+// ═══════════════════════════════════
+// AUDIO CONTEXT + MASTER OUTPUT
+// ═══════════════════════════════════
+let audioCtx = null;
+let masterOut = null; // everything routes here → compressor → destination
+
+function getAudioCtx() {
+  if (!audioCtx) {
+    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+    // DynamicsCompressor acts as a soft limiter — prevents clipping on mobile speakers
+    const comp = audioCtx.createDynamicsCompressor();
+    comp.threshold.value = -18;  // start compressing at -18 dB
+    comp.knee.value       = 10;
+    comp.ratio.value      = 6;
+    comp.attack.value     = 0.003;
+    comp.release.value    = 0.15;
+
+    // Master gain — keep overall level conservative
+    masterOut = audioCtx.createGain();
+    masterOut.gain.value = 0.85;
+
+    masterOut.connect(comp);
+    comp.connect(audioCtx.destination);
+  }
+  if (audioCtx.state === 'suspended') audioCtx.resume();
+  return audioCtx;
+}
+
+// ─── Frequencies: two octaves to cover tanpura (low) and swarams (mid) ───
+// Low octave (C2–B2) for tanpura drone
+const LOW_FREQS = {
+  'C':  65.41, 'C#': 69.30, 'D':  73.42, 'D#': 77.78,
+  'E':  82.41, 'F':  87.31, 'F#': 92.50, 'G':  98.00,
+  'G#':103.83, 'A': 110.00, 'A#':116.54, 'B': 123.47
+};
+// Mid octave (C3–B3) — kept for reference
+const MID_FREQS = {
+  'C': 130.81, 'C#':138.59, 'D': 146.83, 'D#':155.56,
+  'E': 164.81, 'F': 174.61, 'F#':185.00, 'G': 196.00,
+  'G#':207.65, 'A': 220.00, 'A#':233.08, 'B': 246.94
+};
+// High octave (C4–B4) — used for all swaram/game notes (sits above the C2 drone)
+const HIGH_FREQS = {
+  'C': 261.63, 'C#':277.18, 'D': 293.66, 'D#':311.13,
+  'E': 329.63, 'F': 349.23, 'F#':369.99, 'G': 392.00,
+  'G#':415.30, 'A': 440.00, 'A#':466.16, 'B': 493.88
+};
+
+// All 12 chromatic pitches for shruti selection
+const WESTERN_PITCHES = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+const DISPLAY_NAMES    = ['C', 'C#','D', 'D#','E', 'F', 'F#','G', 'G#','A', 'A#','B'];
+
+let selectedPitch = 'C'; // tonic as letter name
+
+// Build shruti grid — western pitch names only
+const shrutiGrid = document.getElementById('shrutiGrid');
+WESTERN_PITCHES.forEach((p, i) => {
+  const btn = document.createElement('button');
+  btn.className = 'shruti-btn' + (i === 0 ? ' selected' : '');
+  btn.innerHTML = `<div style="font-size:16px;font-weight:600">${DISPLAY_NAMES[i]}</div>`;
+  btn.onclick = () => {
+    document.querySelectorAll('.shruti-btn').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedPitch = p;
+    document.getElementById('shrutiStatus').textContent = DISPLAY_NAMES[i];
+    // Preview Sa
+    playNote(MID_FREQS[p], 0.8, 1.5);
+    buildSwaraGrid();
+    retuneDrone();
+  };
+  shrutiGrid.appendChild(btn);
+});
+
+// ─── SWARASTHANAM ───
+// Mapping (example root = C):
+// semi 0  = Sa       (C)
+// semi 1  = R1       (C#)
+// semi 2  = R2 / G1  (D)
+// semi 3  = R3 / G2  (D#)
+// semi 4  = G3       (E)
+// semi 5  = M1       (F)
+// semi 6  = M2       (F#)
+// semi 7  = Pa       (G)
+// semi 8  = D1       (G#)
+// semi 9  = D2 / N1  (A)
+// semi 10 = N2 / D3  (A#)
+// semi 11 = N3       (B)
+// semi 12 = Sa↑      (C)
+const SWARA_GRID = [
+  { name: 'Sa',         line2: '',        semi: 0,  accent: true  },
+  { name: 'R1',         line2: '',        semi: 1                 },
+  { name: 'R2',         line2: 'G1',      semi: 2                 },
+  { name: 'R3',         line2: 'G2',      semi: 3                 },
+  { name: 'G3',         line2: '',        semi: 4                 },
+  { name: 'M1',         line2: '',        semi: 5                 },
+  { name: 'M2',         line2: '',        semi: 6                 },
+  { name: 'Pa',         line2: '',        semi: 7,  accent: true  },
+  { name: 'D1',         line2: '',        semi: 8                 },
+  { name: 'D2',         line2: 'N1',      semi: 9                 },
+  { name: 'N2',         line2: 'D3',      semi: 10                },
+  { name: 'N3',         line2: '',        semi: 11                },
+  { name: 'Sa↑',        line2: '',        semi: 12, accent: true  },
+];
+
+function semitoneFreq(baseFreq, semis) {
+  return baseFreq * Math.pow(2, semis / 12);
+}
+
+function buildSwaraGrid() {
+  const container = document.getElementById('swaraGrid');
+  container.innerHTML = '';
+
+  const grid = document.createElement('div');
+  grid.style.cssText = 'display:grid; grid-template-columns: repeat(auto-fill, minmax(110px,1fr)); gap:10px;';
+
+  const baseFreq = MID_FREQS[selectedPitch];
+
+  SWARA_GRID.forEach(sw => {
+    const btn = document.createElement('button');
+    const isAccent = sw.accent;
+    btn.style.cssText = `
+      background: ${isAccent ? 'rgba(201,148,58,0.12)' : 'var(--surface2)'};
+      border: 1px solid ${isAccent ? 'var(--gold)' : 'var(--border)'};
+      color: var(--cream);
+      font-family: var(--font-body);
+      padding: 14px 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-radius: 1px;
+      text-align: center;
+    `;
+
+    const freq = semitoneFreq(baseFreq, sw.semi);
+    const western = freqToWestern(selectedPitch, sw.semi);
+
+    btn.innerHTML = `
+      <div style="font-size:17px; font-weight:600; color:${isAccent ? 'var(--gold-light)' : 'var(--cream)'};">${sw.name}</div>
+      ${sw.line2 ? `<div style="font-size:12px; color:var(--gold-dim); margin-top:3px; letter-spacing:1px;">${sw.line2}</div>` : `<div style="font-size:12px; margin-top:3px;">&nbsp;</div>`}
+      <div style="font-size:11px; color:var(--cream-dim); margin-top:4px; letter-spacing:1px;">${western}</div>
+    `;
+
+    btn.onmouseover = () => { btn.style.borderColor = 'var(--gold)'; btn.style.background = isAccent ? 'rgba(201,148,58,0.22)' : 'rgba(201,148,58,0.08)'; };
+    btn.onmouseout  = () => { btn.style.borderColor = isAccent ? 'var(--gold)' : 'var(--border)'; btn.style.background = isAccent ? 'rgba(201,148,58,0.12)' : 'var(--surface2)'; };
+
+    btn.onclick = () => {
+      playNote(freq, 0.9, 2.5);
+      const label = sw.line2 ? `${sw.name} / ${sw.line2}` : sw.name;
+      document.getElementById('swaraStatus').textContent = `${label} — ${western} (${Math.round(freq)} Hz)`;
+    };
+
+    grid.appendChild(btn);
+  });
+
+  container.appendChild(grid);
+}
+
+function freqToWestern(rootPitch, semis) {
+  const chromatic = ['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+  const rootIdx = chromatic.indexOf(rootPitch);
+  const noteIdx = (rootIdx + semis) % 12;
+  const octaveUp = semis >= 12;
+  return chromatic[noteIdx] + (octaveUp ? '↑' : '');
+}
+
+buildSwaraGrid();
+
+
+// ─── CONSTANT TANPURA DRONE ───
+// Four persistent string stacks (Sa, Pa, Sa↑, Sa↑), all running simultaneously.
+// Each stack uses:
+//   1. Inharmonic partials  — real string harmonics go slightly sharp (stiffness)
+//   2. Jawari buzz layer    — bandpass-filtered noise mixed low for the bridge rattle
+//   3. Sympathetic shimmer  — two detuned copies beating at ~1.2 Hz on the octave
+
+let tanpuraPlaying  = false;
+let droneGeneration = 0;
+let droneGainMaster = null;
+let droneNodes      = []; // [{oscs:[], noises:[], gainNode}]
+
+const DRONE_RATIOS = [
+  { label:'Sa',  ratio: 1   },
+  { label:'Pa',  ratio: 3/2 },
+  { label:'Ṡa',  ratio: 2   },
+  { label:'Ṡa',  ratio: 2   },
+];
+
+// Cents sharp per harmonic (string inharmonicity)
+const PARTIAL_SHARPNESS = [0, 1.5, 4, 8, 14];
+
+function buildTanpuraVisual() {
+  const vis = document.getElementById('tanpuraVisual');
+  vis.innerHTML = '';
+  const heights = [32, 26, 26, 22];
+  DRONE_RATIOS.forEach((s, i) => {
+    const wrap = document.createElement('div');
+    wrap.className = 'string-wrap';
+    const str = document.createElement('div');
+    str.className = 'string';
+    str.id = 'string-' + i;
+    str.style.height = heights[i] + 'px';
+    const lbl = document.createElement('div');
+    lbl.className = 'string-label';
+    lbl.textContent = s.label;
+    wrap.appendChild(str);
+    wrap.appendChild(lbl);
+    vis.appendChild(wrap);
+  });
+}
+buildTanpuraVisual();
+
+function pluckString(i) {} // no-op in constant mode
+
+function playNote(freq, vol, dur) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  gain.gain.setValueAtTime(vol * 0.6, ctx.currentTime);
+  gain.gain.setValueAtTime(vol * 0.6, ctx.currentTime + dur * 0.6);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + dur);
+  osc.start(); osc.stop(ctx.currentTime + dur);
+}
+
+function startTanpura() {
+  const ctx = getAudioCtx();
+  const vol = parseFloat(document.getElementById('volumeSlider').value) / 100;
+
+  droneGainMaster = ctx.createGain();
+  droneGainMaster.gain.setValueAtTime(0, ctx.currentTime);
+  droneGainMaster.gain.linearRampToValueAtTime(vol, ctx.currentTime + 1.2);
+
+  // HPF to cut inaudible sub-bass
+  const hpf = ctx.createBiquadFilter();
+  hpf.type = 'highpass';
+  hpf.frequency.value = 50;
+  hpf.Q.value = 0.5;
+  droneGainMaster.connect(hpf);
+  hpf.connect(masterOut);
+
+  droneNodes = [];
+  DRONE_RATIOS.forEach((s, i) => {
+    const freq = LOW_FREQS[selectedPitch] * s.ratio;
+    const stringData = { oscs: [], noises: [] };
+
+    // ── Inharmonic partials ──
+    const partials = [
+      { n:1, v:0.28 }, { n:2, v:0.38 },
+      { n:3, v:0.22 }, { n:4, v:0.10 }, { n:5, v:0.05 },
+    ];
+    partials.forEach(({ n, v }) => {
+      const sharp = PARTIAL_SHARPNESS[n - 1] ?? 0;
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * n * Math.pow(2, sharp / 1200);
+      g.gain.value = v * 0.18 / DRONE_RATIOS.length;
+      osc.connect(g);
+      g.connect(droneGainMaster);
+      osc.start();
+      stringData.oscs.push({ osc, g, n, baseFreq: freq });
+    });
+
+    // ── Sympathetic shimmer: two detuned copies on the octave ──
+    [-3.5, 3.5].forEach(detuneCents => {
+      const osc = ctx.createOscillator();
+      const g   = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq * 2 * Math.pow(2, detuneCents / 1200);
+      g.gain.value = 0.06 / DRONE_RATIOS.length;
+      osc.connect(g);
+      g.connect(droneGainMaster);
+      osc.start();
+      stringData.oscs.push({ osc, g, n: 2, baseFreq: freq, detuneCents });
+    });
+
+    // ── Jawari buzz: looping bandpass noise ──
+    const buzzBuf = ctx.createBuffer(1, ctx.sampleRate * 2, ctx.sampleRate);
+    const bd = buzzBuf.getChannelData(0);
+    for (let k = 0; k < bd.length; k++) bd[k] = Math.random() * 2 - 1;
+    const buzzSrc = ctx.createBufferSource();
+    buzzSrc.buffer = buzzBuf;
+    buzzSrc.loop = true;
+    const buzzBpf = ctx.createBiquadFilter();
+    buzzBpf.type = 'bandpass';
+    buzzBpf.frequency.value = freq * 1.8;
+    buzzBpf.Q.value = 12;
+    const buzzGain = ctx.createGain();
+    buzzGain.gain.value = 0.022 / DRONE_RATIOS.length;
+    buzzSrc.connect(buzzBpf);
+    buzzBpf.connect(buzzGain);
+    buzzGain.connect(droneGainMaster);
+    buzzSrc.start();
+    stringData.noises.push({ src: buzzSrc, bpf: buzzBpf, gain: buzzGain, baseFreq: freq });
+
+    droneNodes.push(stringData);
+
+    // Ambient glow
+    const el = document.getElementById('string-' + i);
+    if (el) el.style.boxShadow = '0 0 10px 3px rgba(249,115,22,0.5)';
+  });
+
+  tanpuraPlaying = true;
+  document.getElementById('tanpuraBtn').textContent = '■ Stop';
+  document.getElementById('tanpuraStatus').innerHTML = '<span class="pulse-dot"></span>Drone active';
+}
+
+function stopTanpura() {
+  if (!tanpuraPlaying) return;
+  const ctx = getAudioCtx();
+  const myGen = ++droneGeneration;
+
+  if (droneGainMaster) {
+    droneGainMaster.gain.setValueAtTime(droneGainMaster.gain.value, ctx.currentTime);
+    droneGainMaster.gain.linearRampToValueAtTime(0, ctx.currentTime + 0.8);
+  }
+
+  const nodesToStop = droneNodes.slice();
+  const gainToNull  = droneGainMaster;
+  setTimeout(() => {
+    nodesToStop.forEach(({ oscs, noises }) => {
+      oscs.forEach(({ osc }) => { try { osc.stop(); } catch(e) {} });
+      noises.forEach(({ src }) => { try { src.stop(); } catch(e) {} });
+    });
+    if (droneGeneration === myGen) { droneNodes = []; droneGainMaster = null; }
+  }, 900);
+
+  DRONE_RATIOS.forEach((_, i) => {
+    const el = document.getElementById('string-' + i);
+    if (el) el.style.boxShadow = '';
+  });
+
+  tanpuraPlaying = false;
+  document.getElementById('tanpuraBtn').textContent = '▶ Start';
+  document.getElementById('tanpuraStatus').textContent = 'Off';
+}
+
+function toggleTanpura() {
+  if (tanpuraPlaying) stopTanpura(); else startTanpura();
+}
+
+function updateDroneVolume(val) {
+  const vol = parseInt(val) / 100;
+  if (droneGainMaster) droneGainMaster.gain.setValueAtTime(vol, getAudioCtx().currentTime);
+}
+
+function retuneDrone() {
+  if (!tanpuraPlaying || droneNodes.length === 0) return;
+  const ctx = getAudioCtx();
+  const glide = 0.1;
+  droneNodes.forEach((stringData, i) => {
+    const newBase = LOW_FREQS[selectedPitch] * DRONE_RATIOS[i].ratio;
+    stringData.oscs.forEach(({ osc, n, detuneCents }) => {
+      const sharp = PARTIAL_SHARPNESS[(n - 1)] ?? 0;
+      const cents = (detuneCents ?? 0) + sharp;
+      const target = newBase * n * Math.pow(2, cents / 1200);
+      osc.frequency.linearRampToValueAtTime(target, ctx.currentTime + glide);
+    });
+    stringData.noises.forEach(({ bpf }) => {
+      bpf.frequency.linearRampToValueAtTime(newBase * 1.8, ctx.currentTime + glide);
+    });
+  });
+}
+
+
+// Cycle: Sa → Pa → Sa↑ → Sa↑, each string plucked ~every 2s
+// Synthesis per pluck:
+//   1. Noise burst (jawari buzz)  — short filtered noise shaped to string attack
+//   2. Harmonic stack             — fundamental + inharmonic partials, slow decay
+//   3. Sympathetic shimmer        — two slightly detuned copies beating at ~1 Hz
+// Strings slowly decay over 3.5s — next pluck starts before full silence for overlap
+
+
+
+
+// ═══════════════════════════════════
+// VARISAI DATA
+// ═══════════════════════════════════
+// ═══════════════════════════════════
+// RAGAS
+// ═══════════════════════════════════
+// Each raga maps swaram names to semitone offsets from Sa
+// s/S = lower/upper Sa, r/R=Ri, g/G=Ga, m/M=Ma, p/P=Pa, d/D=Da, n/N=Ni
+// We store per-raga semitone for each scale degree position
+
+const RAGAS = [
+  {
+    name: 'Mayamalavagowlai',
+    short: 'MMG',
+    scale: 'S R1 G3 M1 P D1 N3',
+    semi: { s:0, r:1,  g:4,  m:5,  p:7, d:8,  n:11, S:12 }
+  },
+  {
+    name: 'Kharaharapriya',
+    short: 'KHP',
+    scale: 'S R2 G2 M1 P D2 N2',
+    semi: { s:0, r:2,  g:3,  m:5,  p:7, d:9,  n:10, S:12 }
+  },
+  {
+    name: 'Shankarabharnam',
+    short: 'SNB',
+    scale: 'S R2 G3 M1 P D2 N3',
+    semi: { s:0, r:2,  g:4,  m:5,  p:7, d:9,  n:11, S:12 }
+  },
+  {
+    name: 'Kalyani',
+    short: 'KLY',
+    scale: 'S R2 G3 M2 P D2 N3',
+    semi: { s:0, r:2,  g:4,  m:6,  p:7, d:9,  n:11, S:12 }
+  },
+];
+
+let selectedRaga = 0;
+
+const ragaGrid = document.getElementById('ragaGrid');
+RAGAS.forEach((raga, i) => {
+  const btn = document.createElement('div');
+  btn.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+  btn.innerHTML = `
+    <div style="font-size:15px; font-weight:600; color:var(--cream);">${raga.name}</div>
+    <div style="font-size:12px; color:var(--cream-dim); margin-top:4px; letter-spacing:1px;">${raga.scale}</div>
+  `;
+  btn.onclick = () => {
+    document.querySelectorAll('#ragaGrid .varisai-item').forEach(b => b.classList.remove('selected'));
+    btn.classList.add('selected');
+    selectedRaga = i;
+    document.getElementById('ragaStatus').textContent = raga.name;
+    document.getElementById('ragaScale').textContent = raga.scale;
+    if (metronomeRunning) { stopMetronome(); startMetronome(); }
+  };
+  ragaGrid.appendChild(btn);
+});
+document.getElementById('ragaScale').textContent = RAGAS[0].scale;
+
+// ═══════════════════════════════════
+// EXERCISES
+// ═══════════════════════════════════
+// Notes use lowercase letters: s r g m p d n = Sa Ri Ga Ma Pa Da Ni (mid octave)
+// Uppercase S = upper Sa (semi 12)
+// Each note plays one beat of Adi tala
+
+const VARISAIS = [
+  {
+    name: 'Sarali Varisai 1',
+    notes: ['s','r','g','m','p','d','n','S',  'S','n','d','p','m','g','r','s'],
+  },
+  {
+    name: 'Janta Varisai 1',
+    notes: ['s','s','r','r','g','g','m','m',  'p','p','d','d','n','n','S','S',
+            'S','S','n','n','d','d','p','p',  'm','m','g','g','r','r','s','s'],
+  },
+  {
+    name: 'Janta Varisai 2',
+    // s s r r | g g | m m || r r g g | m m | p p || g g m m | p p | d d || m m p p | d d | n n ||
+    // p p d d | n n | S S || S S n n | d d | p p || n n d d | p p | m m || d d p p | m m | g g ||
+    // p p m m | g g | r r || m m g g | r r | s s ||
+    notes: [
+      's','s','r','r','g','g','m','m',  'r','r','g','g','m','m','p','p',
+      'g','g','m','m','p','p','d','d',  'm','m','p','p','d','d','n','n',
+      'p','p','d','d','n','n','S','S',  'S','S','n','n','d','d','p','p',
+      'n','n','d','d','p','p','m','m',  'd','d','p','p','m','m','g','g',
+      'p','p','m','m','g','g','r','r',  'm','m','g','g','r','r','s','s',
+    ],
+  },
+  {
+    name: 'Janta Varisai 3',
+    // Ascending with bounce pattern: s s r s | s r | s r || s s r r | g g | m m || r r g r | r g | r g || r r g g | m m | p p || ...
+    notes: [
+      // avartana 1
+      's','s','r','s', 's','r','s','r',  's','s','r','r','g','g','m','m',
+      'r','r','g','r', 'r','g','r','g',  'r','r','g','g','m','m','p','p',
+      'g','g','m','g', 'g','m','g','m',  'g','g','m','m','p','p','d','d',
+      'm','m','p','m', 'm','p','m','p',  'm','m','p','p','d','d','n','n',
+      'p','p','d','p', 'p','d','p','d',  'p','p','d','d','n','n','S','S',
+      // avartana 2 (descending)
+      'S','S','n','S', 'S','n','S','n',  'S','S','n','n','d','d','p','p',
+      'n','n','d','n', 'n','d','n','d',  'n','n','d','d','p','p','m','m',
+      'd','d','p','d', 'd','p','d','p',  'd','d','p','p','m','m','g','g',
+      'p','p','m','p', 'p','m','p','m',  'p','p','m','m','g','g','r','r',
+      'm','m','g','m', 'm','g','m','g',  'm','m','g','g','r','r','s','s',
+    ],
+  },
+  {
+    name: 'Dhatu Varisai 1',
+    // s m g m | r g | s r || s g r g | s r | g m || r p m p | g m | r g || r m g m | r g | m p ||
+    // g d p d | m p | g m || g p m p | g m | p d || m n d n | p d | m p || m d p d | m p | d n ||
+    // p S n S | d n | p d || p n d n | p d | n S ||
+    // S p d p | n d | S n || S d n d | S n | d p || n m p m | d p | n d || n p d p | n d | p m ||
+    // d g m g | p m | d p || d m p m | d p | m g || p r g r | m g | p m || p g m g | p m | g r ||
+    // m s r s | g r | m g || m r g r | m g | r s ||
+    notes: [
+      's','m','g','m','r','g','s','r',  's','g','r','g','s','r','g','m',
+      'r','p','m','p','g','m','r','g',  'r','m','g','m','r','g','m','p',
+      'g','d','p','d','m','p','g','m',  'g','p','m','p','g','m','p','d',
+      'm','n','d','n','p','d','m','p',  'm','d','p','d','m','p','d','n',
+      'p','S','n','S','d','n','p','d',  'p','n','d','n','p','d','n','S',
+      'S','p','d','p','n','d','S','n',  'S','d','n','d','S','n','d','p',
+      'n','m','p','m','d','p','n','d',  'n','p','d','p','n','d','p','m',
+      'd','g','m','g','p','m','d','p',  'd','m','p','m','d','p','m','g',
+      'p','r','g','r','m','g','p','m',  'p','g','m','g','p','m','g','r',
+      'm','s','r','s','g','r','m','g',  'm','r','g','r','m','g','r','s',
+    ],
+  },
+  {
+    name: 'Dhatu Varisai 2',
+    // s r s g | r g | r m || s m g r | s r | g m || r g r m | g m | g p || r p m g | r g | m p ||
+    // g m g p | m p | m d || g d p m | g m | p d || m p m d | p d | p n || m n d p | m p | d n ||
+    // p d p n | d n | d S || p S n d | p d | n S || S n S d | n d | n p || S p d n | S n | d p ||
+    // n d n p | d p | d m || n m p d | n d | p m || d p d m | p m | p g || d g m p | d p | m g ||
+    // p m p g | m g | m r || p r g m | p m | g r || m g m r | g r | g s || m s r g | m g | r s ||
+    notes: [
+      's','r','s','g','r','g','r','m',  's','m','g','r','s','r','g','m',
+      'r','g','r','m','g','m','g','p',  'r','p','m','g','r','g','m','p',
+      'g','m','g','p','m','p','m','d',  'g','d','p','m','g','m','p','d',
+      'm','p','m','d','p','d','p','n',  'm','n','d','p','m','p','d','n',
+      'p','d','p','n','d','n','d','S',  'p','S','n','d','p','d','n','S',
+      'S','n','S','d','n','d','n','p',  'S','p','d','n','S','n','d','p',
+      'n','d','n','p','d','p','d','m',  'n','m','p','d','n','d','p','m',
+      'd','p','d','m','p','m','p','g',  'd','g','m','p','d','p','m','g',
+      'p','m','p','g','m','g','m','r',  'p','r','g','m','p','m','g','r',
+      'm','g','m','r','g','r','g','s',  'm','s','r','g','m','g','r','s',
+    ],
+  },
+  {
+    name: 'Eka Talam Alankaram',
+    // SRGM RGMP GMPD MPDN PDNS  SNDP NDPM DPMG PMGR MGRS
+    // Each group of 4 = one beat of eka talam, but we play each note as one unit
+    notes: [
+      's','r','g','m',  'r','g','m','p',  'g','m','p','d',  'm','p','d','n',  'p','d','n','S',
+      'S','n','d','p',  'n','d','p','m',  'd','p','m','g',  'p','m','g','r',  'm','g','r','s',
+    ],
+  },
+];
+
+let selectedVarisai = 0;
+let drillNoteIdx = 0;
+
+const varisaiList = document.getElementById('varisaiList');
+VARISAIS.forEach((v, i) => {
+  const el = document.createElement('div');
+  el.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+  el.innerHTML = `<div class="varisai-name">${v.name}</div><div style="font-size:12px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px;">${v.notes.slice(0,8).map(n=>n.toUpperCase()).join(' · ')}${v.notes.length>8?' …':''}</div>`;
+  el.onclick = () => {
+    document.querySelectorAll('#varisaiList .varisai-item').forEach(x => x.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedVarisai = i;
+    drillNoteIdx = 0;
+    buildNoteDisplay();
+    if (metronomeRunning) { stopMetronome(); startMetronome(); }
+  };
+  varisaiList.appendChild(el);
+});
+
+function buildNoteDisplay() {
+  const v = VARISAIS[selectedVarisai];
+  const container = document.getElementById('noteDisplay');
+  if (!container) return;
+  // Group into avartanas of 8 for Adi tala visual grouping, with dividers
+  let html = '';
+  v.notes.forEach((n, i) => {
+    if (i > 0 && i % 8 === 0) html += `<span style="display:inline-block;width:8px;"></span><span style="display:inline-block;width:1px;height:28px;background:var(--border);vertical-align:middle;margin:0 4px;"></span>`;
+    html += `<span id="nd-${i}" style="
+      display:inline-block; padding:5px 9px; margin:2px;
+      border:1px solid var(--border); border-radius:1px;
+      font-family:var(--font-body); font-size:15px; font-weight:500;
+      color:var(--cream-dim); background:var(--surface2);
+      transition:all 0.12s; letter-spacing:0.5px;
+    ">${n === 'S' ? 'Ṡ' : n.toUpperCase()}</span>`;
+  });
+  container.innerHTML = html;
+}
+
+function highlightNote(idx) {
+  const v = VARISAIS[selectedVarisai];
+  v.notes.forEach((_, i) => {
+    const el = document.getElementById('nd-' + i);
+    if (!el) return;
+    el.style.color = 'var(--cream-dim)';
+    el.style.background = 'var(--surface2)';
+    el.style.borderColor = 'var(--border)';
+    el.style.transform = 'scale(1)';
+  });
+  const cur = document.getElementById('nd-' + idx);
+  if (cur) {
+    cur.style.color = 'var(--gold-light)';
+    cur.style.background = 'rgba(201,148,58,0.2)';
+    cur.style.borderColor = 'var(--gold)';
+    cur.style.transform = 'scale(1.1)';
+    cur.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  }
+}
+
+buildNoteDisplay();
+
+// ═══════════════════════════════════
+// METRONOME & TIMER
+// ═══════════════════════════════════
+let bpm = 80;
+let metronomeRunning = false;
+let metronomeTimeout = null;
+let beatIdx = 0;
+const beatsPerCycle = 8; // fixed Adi tala
+let timerSeconds = 300;
+let timerMax = 300;
+let timerInterval = null;
+
+function updateTempo(val) {
+  bpm = parseInt(val);
+  document.getElementById('tempoDisplay').textContent = bpm;
+  if (metronomeRunning) { stopMetronome(); startMetronome(); }
+}
+
+function buildBeatDots() {
+  const vis = document.getElementById('beatVisual');
+  vis.innerHTML = '';
+  for (let i = 0; i < beatsPerCycle; i++) {
+    const d = document.createElement('div');
+    d.className = 'beat-dot' + (i === 0 ? ' akshara' : '');
+    d.id = 'beat-' + i;
+    vis.appendChild(d);
+  }
+}
+buildBeatDots();
+
+function playClick(isAccent) {
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.frequency.value = isAccent ? 1000 : 700;
+  osc.type = 'square';
+  gain.gain.setValueAtTime(isAccent ? 0.05 : 0.025, ctx.currentTime);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.05);
+  osc.start(); osc.stop(ctx.currentTime + 0.05);
+}
+
+function playDrillNote(noteIdx) {
+  const v = VARISAIS[selectedVarisai];
+  const noteName = v.notes[noteIdx % v.notes.length]; // 's','r','g','m','p','d','n','S'
+  const raga = RAGAS[selectedRaga];
+  const semi = raga.semi[noteName] ?? 0;
+  const baseFreq = MID_FREQS[selectedPitch];
+  const freq = baseFreq * Math.pow(2, semi / 12);
+
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator();
+  const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.type = 'triangle';
+  osc.frequency.setValueAtTime(freq, ctx.currentTime);
+  const noteDur = Math.min((60 / bpm) * 0.82, 0.55);
+  gain.gain.setValueAtTime(0, ctx.currentTime);
+  gain.gain.linearRampToValueAtTime(0.7, ctx.currentTime + 0.012);
+  gain.gain.setValueAtTime(0.7, ctx.currentTime + noteDur * 0.55);
+  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + noteDur);
+  osc.start(); osc.stop(ctx.currentTime + noteDur);
+}
+
+function tick() {
+  if (!metronomeRunning) return;
+  document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
+  const dot = document.getElementById('beat-' + beatIdx);
+  if (dot) dot.classList.add('active');
+  playClick(beatIdx === 0);
+
+  const v = VARISAIS[selectedVarisai];
+  playDrillNote(drillNoteIdx);
+  highlightNote(drillNoteIdx);
+  drillNoteIdx = (drillNoteIdx + 1) % v.notes.length;
+  beatIdx = (beatIdx + 1) % beatsPerCycle;
+
+  metronomeTimeout = setTimeout(tick, (60 / bpm) * 1000);
+}
+
+function startMetronome() {
+  metronomeRunning = true;
+  beatIdx = 0;
+  drillNoteIdx = 0;
+  document.getElementById('metronomeBtn').textContent = '■ Stop';
+  tick();
+  const dur = parseInt(document.getElementById('durationSelect').value);
+  timerMax = dur; timerSeconds = dur;
+  updateTimerDisplay();
+  timerInterval = setInterval(() => {
+    timerSeconds--;
+    updateTimerDisplay();
+    if (timerSeconds <= 0) { stopMetronome(); document.getElementById('drillStatus').textContent = '✦ Session complete!'; }
+  }, 1000);
+}
+
+function stopMetronome() {
+  metronomeRunning = false;
+  clearTimeout(metronomeTimeout);
+  clearInterval(timerInterval);
+  drillNoteIdx = 0;
+  document.getElementById('metronomeBtn').textContent = '▶ Start';
+  document.querySelectorAll('.beat-dot').forEach(d => d.classList.remove('active'));
+  const v = VARISAIS[selectedVarisai];
+  v.notes.forEach((_, i) => {
+    const el = document.getElementById('nd-' + i);
+    if (!el) return;
+    el.style.color = 'var(--cream-dim)';
+    el.style.background = 'var(--surface2)';
+    el.style.borderColor = 'var(--border)';
+    el.style.transform = 'scale(1)';
+  });
+}
+
+function toggleMetronome() {
+  if (metronomeRunning) { stopMetronome(); document.getElementById('drillStatus').textContent = ''; }
+  else { startMetronome(); document.getElementById('drillStatus').innerHTML = '<span class="pulse-dot"></span>Practice active'; }
+}
+
+function resetTimer() {
+  stopMetronome();
+  const dur = parseInt(document.getElementById('durationSelect').value);
+  timerMax = dur; timerSeconds = dur;
+  updateTimerDisplay();
+  document.getElementById('drillStatus').textContent = '';
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerSeconds / 60).toString().padStart(2, '0');
+  const s = (timerSeconds % 60).toString().padStart(2, '0');
+  document.getElementById('timerDisplay').textContent = m + ':' + s;
+  const pct = ((timerMax - timerSeconds) / timerMax) * 100;
+  document.getElementById('timerFill').style.width = pct + '%';
+}
+
+
+// ═══════════════════════════════════
+// SHARED CELEBRATION HELPERS
+// ═══════════════════════════════════
+// ═══════════════════════════════════
+// CELEBRATION ENGINE
+// ═══════════════════════════════════
+
+const CORRECT_MSGS = [
+  '🎉 Yes!', '⭐ Superstar!', '🔥 Nailed it!', '✨ Perfect!',
+  '🌟 Amazing!', '👏 Brilliant!', '💫 Spot on!', '🎯 Correct!',
+  '🏆 Wonderful!', '😍 Beautiful!',
+];
+const STREAK_MSGS = {
+  3:  '🔥 3 in a row!',
+  5:  '🌟 5 streak!',
+  7:  '💥 On fire!',
+  10: '🏆 Unstoppable!!',
+};
+
+function showScorePop(parentEl, text) {
+  const pop = document.createElement('div');
+  pop.className = 'score-pop';
+  pop.textContent = text;
+  parentEl.style.position = 'relative';
+  parentEl.style.overflow = 'visible';
+  parentEl.appendChild(pop);
+  setTimeout(() => pop.remove(), 1000);
+}
+
+function playChime(streakCount) {
+  const ctx = getAudioCtx();
+  // Pick a chord based on streak
+  const notes = streakCount >= 5
+    ? [523.25, 659.25, 783.99, 1046.5]  // C5 maj chord bright
+    : [523.25, 659.25, 783.99];          // C5 triad
+  notes.forEach((freq, i) => {
+    const osc  = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    const t = ctx.currentTime + i * 0.04;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.15, t + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.55);
+    osc.start(t); osc.stop(t + 0.6);
+  });
+}
+
+function launchConfetti(count, cx, cy) {
+  const colors = ['#fbbf24','#f97316','#0ea5a0','#f43f5e','#22c55e','#a78bfa','#fb923c'];
+  for (let i = 0; i < count; i++) {
+    const el = document.createElement('div');
+    el.className = 'confetti-piece';
+    el.style.background = colors[Math.floor(Math.random() * colors.length)];
+    el.style.left = (cx + (Math.random() - 0.5) * 160) + 'px';
+    el.style.top  = (cy + (Math.random() - 0.5) * 60)  + 'px';
+    el.style.animationDuration = (0.7 + Math.random() * 0.6) + 's';
+    el.style.animationDelay    = (Math.random() * 0.15) + 's';
+    el.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    document.body.appendChild(el);
+    setTimeout(() => el.remove(), 1500);
+  }
+}
+
+function showBigWin(msg) {
+  const el = document.createElement('div');
+  el.className = 'big-win-msg';
+  el.textContent = msg;
+  document.body.appendChild(el);
+  setTimeout(() => el.remove(), 1150);
+}
+
+// Main entry point — call on every correct answer
+function celebrate(streak, anchorEl) {
+  // 1. Chime
+  playChime(streak);
+
+  // 2. Score pop
+  const pts = anchorEl;
+  // (caller already calls showScorePop separately for the +pts number)
+
+  // 3. Confetti — burst from center of screen
+  const confettiCount = streak >= 5 ? 28 : streak >= 3 ? 18 : 10;
+  launchConfetti(confettiCount, window.innerWidth / 2, window.innerHeight * 0.45);
+
+  // 4. Streak milestones → big win message
+  if (STREAK_MSGS[streak]) {
+    setTimeout(() => showBigWin(STREAK_MSGS[streak]), 80);
+  }
+}
+
+// Random encouraging word (used in feedback divs)
+function correctMsg() {
+  return CORRECT_MSGS[Math.floor(Math.random() * CORRECT_MSGS.length)];
+}
+
+
+
+// ═══════════════════════════════════
+// PROGRESS & UNLOCK SYSTEM (localStorage)
+// ═══════════════════════════════════
+// Schema: svara_progress = {
+//   game: { levelIdx: { unlocked, highScore, bestStreak, consecutiveToUnlock } }
+// }
+// game keys: 'swara', 'raga', 'shadow'
+// Unlock thresholds (consecutive correct rounds/streaks):
+const UNLOCK_THRESHOLDS = { swara: 5, raga: 3, shadow: 5 };
+const PROGRESS_KEY = 'svara_progress';
+
+function loadProgress() {
+  try {
+    return JSON.parse(localStorage.getItem(PROGRESS_KEY)) || {};
+  } catch(e) { return {}; }
+}
+
+function saveProgress(p) {
+  try { localStorage.setItem(PROGRESS_KEY, JSON.stringify(p)); } catch(e) {}
+}
+
+function getGameProgress(game) {
+  const p = loadProgress();
+  if (!p[game]) p[game] = {};
+  return p[game];
+}
+
+// Returns whether a given level index is unlocked for a game
+function isLevelUnlocked(game, levelIdx) {
+  if (levelIdx === 0) return true; // L1 always open
+  const gp = getGameProgress(game);
+  return !!(gp[levelIdx] && gp[levelIdx].unlocked);
+}
+
+// Call after a qualifying success — returns true if newly unlocked
+function recordSuccess(game, levelIdx, score, streak) {
+  const p = loadProgress();
+  if (!p[game]) p[game] = {};
+
+  // Update stats for current level
+  const cur = p[game][levelIdx] || { unlocked: levelIdx === 0, highScore: 0, bestStreak: 0, consecutive: 0 };
+  if (score > cur.highScore) cur.highScore = score;
+  if (streak > cur.bestStreak) cur.bestStreak = streak;
+  cur.consecutive = (cur.consecutive || 0) + 1;
+  p[game][levelIdx] = cur;
+
+  // Check if next level should be unlocked
+  const threshold = UNLOCK_THRESHOLDS[game];
+  let newUnlock = false;
+  if (cur.consecutive >= threshold) {
+    const nextIdx = levelIdx + 1;
+    if (!p[game][nextIdx]) p[game][nextIdx] = { unlocked: false, highScore: 0, bestStreak: 0, consecutive: 0 };
+    if (!p[game][nextIdx].unlocked) {
+      p[game][nextIdx].unlocked = true;
+      newUnlock = true;
+    }
+    cur.consecutive = 0; // reset after unlocking
+  }
+
+  saveProgress(p);
+  return newUnlock;
+}
+
+// Reset consecutive count on a miss
+function recordMiss(game, levelIdx) {
+  const p = loadProgress();
+  if (!p[game]) p[game] = {};
+  if (!p[game][levelIdx]) p[game][levelIdx] = { unlocked: levelIdx === 0, highScore: 0, bestStreak: 0, consecutive: 0 };
+  p[game][levelIdx].consecutive = 0;
+  saveProgress(p);
+}
+
+// Get stats string for display
+function getLevelStats(game, levelIdx) {
+  const gp = getGameProgress(game);
+  const s = gp[levelIdx];
+  if (!s || (s.highScore === 0 && s.bestStreak === 0)) return null;
+  return `Best: ${s.bestStreak} streak · High score: ${s.highScore}`;
+}
+
+// Re-render a level grid with lock/unlock state and stats
+function refreshLevelGrid(game, levels, gridId, selectedIdx, onSelect) {
+  const lg = document.getElementById(gridId);
+  if (!lg) return;
+  lg.innerHTML = '';
+  const threshold = UNLOCK_THRESHOLDS[game];
+  const gp = getGameProgress(game);
+
+  levels.forEach((lv, i) => {
+    const unlocked = isLevelUnlocked(game, i);
+    const isSelected = i === selectedIdx;
+    const stats = getLevelStats(game, i);
+    const consecutive = (gp[i] && gp[i].consecutive) || 0;
+    const nextUnlockProgress = unlocked && i < levels.length - 1 && !isLevelUnlocked(game, i + 1)
+      ? `<div style="font-size:11px;color:var(--teal-dim);margin-top:5px;">🔓 ${consecutive}/${threshold} to unlock next</div>`
+      : '';
+
+    const card = document.createElement('div');
+    card.className = 'level-card' + (isSelected && unlocked ? ' selected' : '');
+    card.style.opacity = unlocked ? '1' : '0.5';
+    card.style.cursor  = unlocked ? 'pointer' : 'not-allowed';
+    card.style.position = 'relative';
+
+    const lockBadge = unlocked ? '' :
+      `<div style="position:absolute;top:10px;right:12px;font-size:18px;">🔒</div>`;
+    const checkBadge = unlocked && stats ?
+      `<div style="position:absolute;top:10px;right:12px;font-size:14px;color:var(--green);">✅</div>` : '';
+
+    card.innerHTML = `
+      ${lockBadge}${checkBadge}
+      <div style="font-size:13px;font-weight:700;color:${unlocked ? 'var(--gold-light)' : 'var(--cream-dim)'};margin-bottom:4px;padding-right:24px;">
+        Level ${lv.id} — ${lv.name}
+      </div>
+      <div style="font-size:12px;color:var(--cream-dim);">${unlocked ? lv.desc : '🔒 Complete the previous level to unlock'}</div>
+      ${stats && unlocked ? `<div style="font-size:11px;color:var(--teal-dim);margin-top:5px;">${stats}</div>` : ''}
+      ${nextUnlockProgress}
+    `;
+
+    if (unlocked) {
+      card.onclick = () => {
+        onSelect(i);
+        refreshLevelGrid(game, levels, gridId, i, onSelect);
+      };
+    }
+    lg.appendChild(card);
+  });
+}
+
+
+// ═══════════════════════════════════
+// SWARASTHANAM GAME
+// ═══════════════════════════════════
+
+const SWARAM_KEYS   = ['s','r','g','m','p','d','n','S'];
+const SWARAM_LABELS = { s:'Sa', r:'Ri', g:'Ga', m:'Ma', p:'Pa', d:'Da', n:'Ni', S:'Ṡa' };
+
+// 5 levels:
+// 1 - Listen & Echo:  single note, correct button glows for 0.9s then dim — tap the lit one
+// 2 - Guided:         3 random choices shown (correct + 2 wrong), no glow
+// 3 - Name That Note: all 8 buttons, single note, no hints
+// 4 - Sequence:       2-note sequence, all buttons
+// 5 - Speed Sequence: 3-note sequence, all buttons, faster playback
+const GAME_LEVELS = [
+  { id:1, name:'Listen & Echo',   desc:'The correct button glows — just tap it!',           notes:1, choices:1, glow:900  },
+  { id:2, name:'3 Choices',       desc:'Hear a note, pick from 3 options.',                  notes:1, choices:3, glow:0    },
+  { id:3, name:'Name That Note',  desc:'Hear a note, identify it from all 8 swarams.',       notes:1, choices:8, glow:0    },
+  { id:4, name:'Sequence (2)',    desc:'Hear 2 notes in order, name each one.',              notes:2, choices:8, glow:0    },
+  { id:5, name:'Sequence+',      desc:'Start with 3 notes — every 5 perfect rounds adds another. Cap: 9!', notes:3, choices:8, glow:0    },
+];
+
+let gameRagaIdx   = 0;
+let gameLevelIdx  = 0;
+let gameSequence  = [];
+let gameGuessIdx  = 0;
+let gameStreak    = 0;
+let gameBestStreak = 0;
+let gameScore     = 0;
+let gameTotalAnswered = 0;
+let gameTotalCorrect  = 0;
+let gameChoicePool = [];
+let gameL5Notes        = 3;   // current sequence length for Level 5 (starts at 3, grows to 9)
+let gameL5PerfectRuns  = 0;   // consecutive perfect rounds at current L5 note count
+let gameCurrentRoundCorrect = true; // tracks if current round has had any misses
+
+// ── Setup UI ──
+(function buildGameSetup() {
+  const rg = document.getElementById('gameRagaGrid');
+  RAGAS.forEach((raga, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+    btn.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--cream)">${raga.name}</div>
+                     <div style="font-size:11px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px">${raga.scale}</div>`;
+    btn.onclick = () => {
+      rg.querySelectorAll('.varisai-item').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); gameRagaIdx = i;
+    };
+    rg.appendChild(btn);
+  });
+
+  const lg = document.getElementById('gameLevelGrid');
+  const onGameLevelSelect = (i) => { gameLevelIdx = i; };
+  refreshLevelGrid('swara', GAME_LEVELS, 'gameLevelGrid', gameLevelIdx, onGameLevelSelect);
+})();
+
+function gamePlayNote(key, ragaIdx, delaySeconds) {
+  const raga = RAGAS[ragaIdx];
+  const semi = raga.semi[key] ?? 0;
+  const freq = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.type = 'triangle'; osc.frequency.value = freq;
+  const t = ctx.currentTime + delaySeconds;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+  gain.gain.setValueAtTime(0.75, t + 0.4);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+  osc.start(t); osc.stop(t + 0.65);
+}
+
+function playGameSequence() {
+  const btn = document.getElementById('gamePlayBtn');
+  btn.disabled = true; btn.textContent = '♩ Playing…';
+  const lv = GAME_LEVELS[gameLevelIdx];
+  const spacing = gameSequence.length >= 4 ? 0.55 : 0.75;
+  gameSequence.forEach((key, i) => gamePlayNote(key, gameRagaIdx, i * spacing));
+  const dur = (gameSequence.length - 1) * spacing * 1000 + 700;
+  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Play Again'; }, dur);
+}
+
+function generateGameSequence() {
+  const lv = GAME_LEVELS[gameLevelIdx];
+  const noteCount = (gameLevelIdx === 4) ? gameL5Notes : lv.notes;
+  const pool = Object.keys(RAGAS[gameRagaIdx].semi);
+  const seq = [];
+  for (let i = 0; i < noteCount; i++) {
+    let pick;
+    do { pick = pool[Math.floor(Math.random() * pool.length)]; }
+    while (seq.length > 0 && pick === seq[seq.length - 1]);
+    seq.push(pick);
+  }
+  return seq;
+}
+
+function buildGameAnswerGrid(forKey) {
+  // forKey = the key we're currently expecting (for glow / choice filtering)
+  const lv = GAME_LEVELS[gameLevelIdx];
+  const raga = RAGAS[gameRagaIdx];
+  const allKeys = Object.keys(raga.semi);
+  const grid = document.getElementById('gameAnswerGrid');
+  grid.innerHTML = '';
+
+  // Determine which keys to show
+  let keysToShow;
+  if (lv.choices === 1) {
+    // Level 1: show all but only glow the correct one
+    keysToShow = allKeys;
+  } else if (lv.choices === 3) {
+    // Level 2: correct + 2 random wrong
+    const wrong = allKeys.filter(k => k !== forKey).sort(() => Math.random() - 0.5).slice(0, 2);
+    keysToShow = [forKey, ...wrong].sort((a,b) => allKeys.indexOf(a) - allKeys.indexOf(b));
+    gameChoicePool = keysToShow;
+  } else {
+    keysToShow = allKeys;
+  }
+
+  keysToShow.forEach(key => {
+    const semi = raga.semi[key];
+    const label = rgVariantLabel(key, semi);
+    const btn = document.createElement('button');
+    btn.id = 'gbtn-' + key;
+    btn.style.cssText = `background:var(--surface2);border:1px solid var(--border);color:var(--cream);
+      font-family:var(--font-body);font-size:16px;font-weight:600;padding:14px 8px;
+      cursor:pointer;transition:all 0.15s;border-radius:1px;text-align:center;letter-spacing:1px;`;
+    btn.textContent = label;
+    btn.onmouseover = () => { if (!btn.disabled) { btn.style.borderColor='var(--gold)'; btn.style.background='rgba(201,148,58,0.1)'; } };
+    btn.onmouseout  = () => { if (!btn.disabled) btn.style.cssText = btn.style.cssText; };
+    btn.onclick = () => handleGameGuess(key);
+    grid.appendChild(btn);
+  });
+
+  // Level 1: glow the correct button briefly then dim
+  if (lv.glow > 0) {
+    const glowBtn = document.getElementById('gbtn-' + forKey);
+    if (glowBtn) {
+      glowBtn.style.borderColor = 'var(--gold)';
+      glowBtn.style.background = 'rgba(201,148,58,0.35)';
+      glowBtn.style.boxShadow = '0 0 16px rgba(201,148,58,0.5)';
+      setTimeout(() => {
+        if (glowBtn) {
+          glowBtn.style.borderColor = 'var(--border)';
+          glowBtn.style.background = 'var(--surface2)';
+          glowBtn.style.boxShadow = '';
+        }
+      }, lv.glow);
+    }
+  }
+}
+
+function startGame() {
+  gameStreak = 0; gameBestStreak = 0; gameScore = 0;
+  gameTotalAnswered = 0; gameTotalCorrect = 0; gameGuessIdx = 0;
+  gameL5Notes = 3; gameL5PerfectRuns = 0; gameCurrentRoundCorrect = true;
+  document.getElementById('gameSetup').style.display = 'none';
+  document.getElementById('gamePlay').style.display = 'block';
+  const lv = GAME_LEVELS[gameLevelIdx];
+  document.getElementById('gameLevelLabel').textContent = `Level ${lv.id} — ${lv.name}`;
+  document.getElementById('gamePlayBtn').textContent = '▶ Play Note';
+  beginGameRound();
+}
+
+function beginGameRound() {
+  gameSequence = generateGameSequence();
+  gameGuessIdx = 0;
+  gameCurrentRoundCorrect = true;
+  const lv = GAME_LEVELS[gameLevelIdx];
+  const noteCount = gameSequence.length;
+  const isL5 = gameLevelIdx === 4;
+  const labelSuffix = isL5
+    ? ` · ${noteCount} notes${gameL5Notes < 9 ? ` (${gameL5PerfectRuns}/5 to next)` : ' · MAX!'}`
+    : '';
+  document.getElementById('gameLevelLabel').textContent = `Level ${lv.id} — ${lv.name}${labelSuffix}`;
+  document.getElementById('gameAnswerLabel').textContent =
+    noteCount > 1 ? `Note 1 of ${noteCount}` : 'Which note was that?';
+  document.getElementById('gameFeedback').textContent = '';
+
+  // Build slot display
+  const display = document.getElementById('gameSeqDisplay');
+  display.innerHTML = gameSequence.map((_, i) =>
+    `<div id="gslot-${i}" style="width:52px;height:52px;border:1px solid var(--border);border-radius:1px;background:var(--surface2);
+      display:flex;align-items:center;justify-content:center;font-family:var(--font-display);font-size:18px;color:var(--cream-dim);">?</div>`
+  ).join('');
+
+  buildGameAnswerGrid(gameSequence[0]);
+  document.getElementById('gameScore').textContent = gameScore;
+  document.getElementById('gameStreak').textContent = gameStreak > 0
+    ? (gameStreak >= 3 ? `🔥${gameStreak}` : gameStreak)
+    : '0';
+  setTimeout(playGameSequence, 500);
+}
+
+function handleGameGuess(key) {
+  const correct = gameSequence[gameGuessIdx];
+  const isRight = key === correct;
+  const raga = RAGAS[gameRagaIdx];
+  const semi = raga.semi[correct];
+  const correctLabel = rgVariantLabel(correct, semi);
+
+  // Reveal slot
+  const slot = document.getElementById('gslot-' + gameGuessIdx);
+  if (slot) {
+    slot.textContent = correctLabel;
+    slot.style.borderColor = isRight ? 'var(--gold)' : 'var(--red)';
+    slot.style.background  = isRight ? 'rgba(201,148,58,0.18)' : 'rgba(192,58,42,0.18)';
+    slot.style.color       = isRight ? 'var(--gold-light)' : '#e06050';
+  }
+
+  // Flash tapped button
+  const btn = document.getElementById('gbtn-' + key);
+  if (btn) {
+    btn.style.background  = isRight ? 'rgba(201,148,58,0.3)' : 'rgba(192,58,42,0.25)';
+    btn.style.borderColor = isRight ? 'var(--gold)' : 'var(--red)';
+    if (!isRight) {
+      // Also briefly highlight the correct one
+      const correctBtn = document.getElementById('gbtn-' + correct);
+      if (correctBtn) { correctBtn.style.borderColor='var(--gold)'; correctBtn.style.background='rgba(201,148,58,0.25)'; }
+      setTimeout(() => { if (correctBtn) { correctBtn.style.borderColor='var(--border)'; correctBtn.style.background='var(--surface2)'; } }, 600);
+    }
+    setTimeout(() => { if (btn && !btn.disabled) { btn.style.background='var(--surface2)'; btn.style.borderColor='var(--border)'; } }, 300);
+  }
+
+  gameTotalAnswered++;
+  if (isRight) { gameTotalCorrect++; gameStreak++; if (gameStreak > gameBestStreak) gameBestStreak = gameStreak; }
+  else { gameStreak = 0; gameCurrentRoundCorrect = false; }
+
+  const lv = GAME_LEVELS[gameLevelIdx];
+  if (isRight) {
+    const pts = 10 + (gameLevelIdx * 5);
+    gameScore += pts;
+    showScorePop(document.getElementById('gameFeedback'), `+${pts}`);
+    celebrate(gameStreak, null);
+    document.getElementById('gameFeedback').textContent = correctMsg();
+    document.getElementById('gameFeedback').style.color = 'var(--teal-light)';
+  } else {
+    document.getElementById('gameFeedback').textContent = `It was ${correctLabel}`;
+    document.getElementById('gameFeedback').style.color = '#e06050';
+  }
+
+  gameGuessIdx++;
+
+  if (gameGuessIdx < gameSequence.length) {
+    // More notes in sequence
+    document.getElementById('gameAnswerLabel').textContent = `Note ${gameGuessIdx + 1} of ${gameSequence.length}`;
+    document.getElementById('gameScore').textContent = gameScore;
+    document.getElementById('gameStreak').textContent = gameStreak >= 3 ? `🔥${gameStreak}` : gameStreak;
+    setTimeout(() => buildGameAnswerGrid(gameSequence[gameGuessIdx]), 350);
+  } else {
+    // Round done
+    document.getElementById('gameScore').textContent = gameScore;
+    document.getElementById('gameStreak').textContent = gameStreak >= 3 ? `🔥${gameStreak}` : gameStreak;
+
+    // Level 5: check if we should increase the note count
+    if (gameLevelIdx === 4) {
+      if (gameCurrentRoundCorrect) {
+        gameL5PerfectRuns++;
+        if (gameL5PerfectRuns >= 5 && gameL5Notes < 9) {
+          gameL5Notes++;
+          gameL5PerfectRuns = 0;
+          setTimeout(() => showBigWin(`🔥 ${gameL5Notes} notes now!`), 200);
+        }
+      } else {
+        gameL5PerfectRuns = 0;
+      }
+    }
+
+    // Progress tracking
+    if (gameCurrentRoundCorrect) {
+      const newUnlock = recordSuccess('swara', gameLevelIdx, gameScore, gameStreak);
+      if (newUnlock) {
+        setTimeout(() => {
+          showBigWin('🔓 New level unlocked!');
+          refreshLevelGrid('swara', GAME_LEVELS, 'gameLevelGrid', gameLevelIdx, (i) => { gameLevelIdx = i; });
+        }, 400);
+      }
+    } else {
+      recordMiss('swara', gameLevelIdx);
+    }
+
+    setTimeout(beginGameRound, isRight ? 600 : 1000);
+  }
+}
+
+function endGame() {
+  document.getElementById('gamePlay').style.display = 'none';
+  document.getElementById('gameSetup').style.display = 'block';
+  gameStreak = 0;
+  refreshLevelGrid('swara', GAME_LEVELS, 'gameLevelGrid', gameLevelIdx, (i) => { gameLevelIdx = i; });
+}
+
+function resetGame() { endGame(); }
+
+
+// ═══════════════════════════════════
+// GUESS THE RAGAM GAME
+// ═══════════════════════════════════
+
+// Variant label helper (used by Shadowing too)
+const RG_VARIANT_NAMES = {
+  s: { 0:'Sa' }, r: { 1:'R1', 2:'R2' }, g: { 3:'G2', 4:'G3' },
+  m: { 5:'M1', 6:'M2' }, p: { 7:'Pa' }, d: { 8:'D1', 9:'D2' },
+  n: { 10:'N2', 11:'N3' }, S: { 12:'Ṡa' },
+};
+function rgVariantLabel(key, semi) {
+  return (RG_VARIANT_NAMES[key] && RG_VARIANT_NAMES[key][semi]) || SWARAM_LABELS[key] || key.toUpperCase();
+}
+
+// 5 levels:
+// 1 - Raga Explorer:  all 4 ragas shown with "Hear it" buttons + a Compare button; tap which one you just heard
+// 2 - Two Choices:    exactly 2 ragas shown; always single correct answer; short 2-note sequence
+// 3 - Four Choices:   all 4 ragas; single correct answer; unambiguous 3-note sequence
+// 4 - Multi-Select:   all 4 ragas; may be >1 correct; 4-5 note sequence
+// 5 - Expert:         unambiguous 4-note seq but raga names hidden — only scale shown
+const RG_LEVELS = [
+  { id:1, name:'Play & Reveal', desc:'The sequence plays and the answer is shown — just listen and learn!', notes:2, multi:false, hideNames:false, pairs:false, reveal:true  },
+  { id:2, name:'Two Choices',   desc:'Choose between 2 ragas — one is always correct.',                     notes:2, multi:false, hideNames:false, pairs:true,  reveal:false },
+  { id:3, name:'Four Choices',  desc:'All 4 ragas shown — pick the one correct answer.',                    notes:3, multi:false, hideNames:false, pairs:false, reveal:false },
+  { id:4, name:'Multi-Select',  desc:'5 notes — any of the 4 ragas may be valid, select all that apply.',   notes:5, multi:true,  hideNames:false, pairs:false, reveal:false },
+  { id:5, name:'Expert',        desc:'Fewer notes, more ambiguity — identify all valid ragas.',              notes:3, multi:true,  hideNames:false, pairs:false, reveal:false },
+];
+
+let rgLevelIdx     = 0;
+let rgScore        = 0;
+let rgStreak       = 0;
+let rgBestStreak   = 0;
+let rgSourceRaga   = null;
+let rgSequence     = [];
+let rgCorrectRagas = [];
+let rgSelected     = new Set();
+let rgSubmitted    = false;
+
+function rgRagasForSequence(sequence, sourceSemi) {
+  return RAGAS.filter(raga =>
+    sequence.every(key => Object.values(raga.semi).includes(sourceSemi[key]))
+  ).map(r => r.name);
+}
+
+// ── Setup UI ──
+(function buildRgSetup() {
+  const onRgLevelSelect = (i) => { rgLevelIdx = i; };
+  refreshLevelGrid('raga', RG_LEVELS, 'rgLevelGrid', rgLevelIdx, onRgLevelSelect);
+})();
+
+function rgGenerateRound() {
+  const lv = RG_LEVELS[rgLevelIdx];
+  rgSourceRaga = RAGAS[Math.floor(Math.random() * RAGAS.length)];
+  const pool = Object.keys(rgSourceRaga.semi);
+  const seq = [];
+  for (let i = 0; i < lv.notes; i++) {
+    let pick;
+    let attempts = 0;
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+      attempts++;
+    } while (seq.length > 0 && pick === seq[seq.length - 1] && attempts < 20);
+    seq.push(pick);
+  }
+  rgSequence = seq;
+  rgCorrectRagas = rgRagasForSequence(seq, rgSourceRaga.semi);
+
+  // For levels 1-3, regenerate if sequence is ambiguous across multiple ragas
+  if (!lv.multi && rgCorrectRagas.length > 1) {
+    return rgGenerateRound();
+  }
+}
+
+function rgPlaySequence() {
+  const btn = document.getElementById('rgPlayBtn');
+  btn.disabled = true; btn.textContent = '♩ Playing…';
+  const spacing = 0.7;
+  rgSequence.forEach((key, i) => {
+    const semi = rgSourceRaga.semi[key] ?? 0;
+    const freq = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    const t = ctx.currentTime + i * spacing;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+    gain.gain.setValueAtTime(0.75, t + 0.4);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
+    osc.start(t); osc.stop(t + 0.65);
+  });
+  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Play Again'; }, rgSequence.length * spacing * 1000 + 400);
+}
+
+function rgPlayRagaScale(ragaIdx) {
+  const raga = RAGAS[ragaIdx];
+  const keys = Object.keys(raga.semi);
+  const spacing = 0.7;   // seconds between note starts
+  const sustain = 0.55;  // hold at full volume
+  const decay   = 0.9;   // total note length including fade
+  keys.forEach((key, i) => {
+    const semi = raga.semi[key];
+    const freq = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    const t = ctx.currentTime + i * spacing;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.6, t + 0.03);
+    gain.gain.setValueAtTime(0.6, t + sustain);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + decay);
+    osc.start(t); osc.stop(t + decay + 0.05);
+  });
+}
+
+function rgBuildChoices() {
+  const lv = RG_LEVELS[rgLevelIdx];
+  const grid = document.getElementById('rgChoices');
+  grid.innerHTML = '';
+
+  let ragasToShow = [...RAGAS];
+
+  // Level 2: show only 2 ragas — correct + 1 random wrong
+  if (lv.pairs) {
+    const correct = rgCorrectRagas[0];
+    const wrong = RAGAS.filter(r => r.name !== correct);
+    const pick = wrong[Math.floor(Math.random() * wrong.length)];
+    ragasToShow = [RAGAS.find(r => r.name === correct), pick].sort(() => Math.random() - 0.5);
+  }
+
+  ragasToShow.forEach(raga => {
+    const isCorrect = rgCorrectRagas.includes(raga.name);
+    const div = document.createElement('div');
+    div.id = 'rgbtn-' + raga.name;
+    div.style.cssText = `padding:14px;border:1px solid var(--border);background:var(--surface2);
+      cursor:pointer;transition:all 0.2s;border-radius:1px;`;
+
+    const nameHtml = `<div style="font-size:14px;font-weight:700;color:var(--cream);">${raga.name}</div>`;
+
+    const hearBtn = '';
+
+    div.innerHTML = `${nameHtml}
+      <div style="font-size:11px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px;">${raga.scale}</div>
+      ${hearBtn}`;
+
+    div.onclick = () => {
+      if (rgSubmitted) return;
+      if (lv.multi) {
+        // Multi-select toggle
+        if (rgSelected.has(raga.name)) {
+          rgSelected.delete(raga.name);
+          div.style.borderColor = 'var(--border)'; div.style.background = 'var(--surface2)';
+        } else {
+          rgSelected.add(raga.name);
+          div.style.borderColor = 'var(--gold)'; div.style.background = 'rgba(201,148,58,0.15)';
+        }
+        document.getElementById('rgHint').textContent = rgSelected.size > 0 ? `${rgSelected.size} selected` : '';
+        document.getElementById('rgSubmitBtn').style.display = rgSelected.size > 0 ? 'inline-block' : 'none';
+      } else {
+        // Single-select: auto-submit
+        rgSelected = new Set([raga.name]);
+        rgSubmit();
+      }
+    };
+    grid.appendChild(div);
+  });
+}
+
+function rgStart() {
+  rgScore = 0; rgStreak = 0; rgBestStreak = 0; rgSelected = new Set(); rgSubmitted = false;
+  document.getElementById('rgSetup').style.display = 'none';
+  document.getElementById('rgPlay').style.display = 'block';
+  const lv = RG_LEVELS[rgLevelIdx];
+  document.getElementById('rgLevelLabel').textContent = `Level ${lv.id} — ${lv.name}`;
+  document.getElementById('rgInstruction').textContent =
+    lv.reveal ? 'Listen — the answer will be revealed automatically 🎧' :
+    lv.multi  ? 'Select all ragas this could belong to' : 'Which raga is this?';
+  document.getElementById('rgSubmitBtn').style.display = lv.multi ? 'none' : 'none'; // shown only for multi after selection
+  rgBeginRound();
+}
+
+function rgBeginRound() {
+  rgSelected = new Set(); rgSubmitted = false;
+  rgGenerateRound();
+  const lv = RG_LEVELS[rgLevelIdx];
+  document.getElementById('rgFeedback').style.display = 'none';
+  document.getElementById('rgNextBtn').style.display = 'none';
+  document.getElementById('rgSubmitBtn').style.display = 'none';
+  document.getElementById('rgHint').textContent = '';
+  document.getElementById('rgPlayBtn').textContent = '▶ Play Sequence';
+  document.getElementById('rgPlayBtn').disabled = false;
+  document.getElementById('rgScore').textContent = rgScore;
+  document.getElementById('rgStreak').textContent = rgStreak >= 3 ? `🔥${rgStreak}` : rgStreak;
+
+  // Sequence display
+  const seqEl = document.getElementById('rgSeqDisplay');
+  seqEl.innerHTML = rgSequence.map((_, i) =>
+    `<div id="rgslot-${i}" style="width:44px;height:44px;border:1px solid var(--border);border-radius:12px;
+      background:var(--surface2);display:flex;align-items:center;justify-content:center;
+      font-family:var(--font-display);font-size:16px;color:var(--cream-dim);">?</div>`
+  ).join('');
+
+  if (lv.reveal) {
+    // Level 1: clear choice grid, auto-reveal after sequence plays
+    document.getElementById('rgChoices').innerHTML =
+      `<div style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px;">
+        🎧 Listen carefully…
+      </div>`;
+    setTimeout(() => {
+      rgPlaySequence();
+      // Reveal after sequence finishes playing
+      const revealDelay = rgSequence.length * 700 + 900;
+      setTimeout(() => rgReveal(), revealDelay);
+    }, 400);
+  } else {
+    rgBuildChoices();
+    setTimeout(rgPlaySequence, 500);
+  }
+}
+
+function rgReveal() {
+  // Level 1: show the answer without scoring, then play the raga scale
+  rgSubmitted = true;
+  const correct = rgCorrectRagas[0];
+  const ragaIdx = RAGAS.findIndex(r => r.name === correct);
+  const raga = RAGAS[ragaIdx];
+
+  // Reveal sequence slots
+  rgSequence.forEach((key, i) => {
+    const slot = document.getElementById('rgslot-' + i);
+    if (slot) {
+      slot.textContent = rgVariantLabel(key, rgSourceRaga.semi[key] ?? 0);
+      slot.style.color = 'var(--gold-light)';
+      slot.style.borderColor = 'var(--gold)';
+      slot.style.background = 'rgba(201,148,58,0.15)';
+    }
+  });
+
+  // Show answer card
+  const grid = document.getElementById('rgChoices');
+  grid.innerHTML = `
+    <div style="padding:16px;border:2px solid var(--teal-light);background:rgba(14,165,160,0.12);border-radius:12px;text-align:center;">
+      <div style="font-size:13px;color:var(--cream-dim);margin-bottom:6px;">That was…</div>
+      <div style="font-size:22px;font-weight:800;color:var(--teal-light);margin-bottom:4px;">${correct}</div>
+      <div style="font-size:12px;color:var(--cream-dim);margin-bottom:14px;letter-spacing:1px;">${raga.scale}</div>
+      <button onclick="rgPlayRagaScale(${ragaIdx})" style="
+        padding:8px 18px;font-size:13px;font-weight:700;font-family:var(--font-body);
+        background:rgba(14,165,160,0.2);border:2px solid var(--teal);color:var(--teal-light);
+        border-radius:8px;cursor:pointer;">▶ Hear the full scale</button>
+    </div>`;
+
+  document.getElementById('rgHint').textContent = 'Listen to the scale, then tap Next to try another!';
+  document.getElementById('rgNextBtn').style.display = 'inline-block';
+
+  // Auto-play the scale so students hear it immediately
+  setTimeout(() => rgPlayRagaScale(ragaIdx), 300);
+}
+
+function rgSubmit() {
+  if (rgSubmitted) return;
+  rgSubmitted = true;
+  const lv = RG_LEVELS[rgLevelIdx];
+
+  const selected = [...rgSelected];
+  const correct  = rgCorrectRagas;
+  const exact    = !lv.multi
+    ? selected.length === 1 && correct.includes(selected[0])
+    : selected.length === correct.length && selected.every(r => correct.includes(r));
+
+  if (exact) { rgStreak++; if (rgStreak > rgBestStreak) rgBestStreak = rgStreak; }
+  else { rgStreak = 0; }
+
+  const pts = exact ? (10 + rgLevelIdx * 5) : 0;
+  if (exact) {
+    rgScore += pts;
+    celebrate(rgStreak, null);
+  }
+
+  // Colour choice buttons
+  document.querySelectorAll('[id^="rgbtn-"]').forEach(div => {
+    const name = div.id.replace('rgbtn-', '');
+    const isCor = correct.includes(name); const isSel = rgSelected.has(name);
+    div.style.cursor = 'default';
+    if (isCor && isSel)    { div.style.borderColor='var(--gold)';  div.style.background='rgba(201,148,58,0.22)'; }
+    else if (isCor)         { div.style.borderColor='#6ab';         div.style.background='rgba(80,160,180,0.15)'; }
+    else if (isSel && !isCor) { div.style.borderColor='var(--red)'; div.style.background='rgba(192,58,42,0.18)'; }
+  });
+
+  // Reveal sequence slots
+  rgSequence.forEach((key, i) => {
+    const slot = document.getElementById('rgslot-' + i);
+    if (slot) {
+      const semi = rgSourceRaga.semi[key] ?? 0;
+      slot.textContent = rgVariantLabel(key, semi);
+      slot.style.color = 'var(--gold-light)'; slot.style.borderColor = 'var(--gold)';
+      slot.style.background = 'rgba(201,148,58,0.12)';
+    }
+  });
+
+  const fb = document.getElementById('rgFeedback');
+  fb.style.display = 'block';
+  if (exact) {
+    fb.innerHTML = `<span style="color:var(--teal-light);font-weight:700;">${correctMsg()} +${pts}</span>
+      &nbsp; ${correct.join(', ')}`;
+    showScorePop(fb, `+${pts}`);
+  } else {
+    fb.innerHTML = `<span style="color:#e06050;font-weight:600;">Not quite —</span>
+      the answer was <strong style="color:var(--gold-light)">${correct.join(', ')}</strong>`;
+  }
+
+  document.getElementById('rgScore').textContent = rgScore;
+  document.getElementById('rgStreak').textContent = rgStreak >= 3 ? `🔥${rgStreak}` : rgStreak;
+  document.getElementById('rgSubmitBtn').style.display = 'none';
+  document.getElementById('rgNextBtn').style.display = 'inline-block';
+
+  // Progress tracking
+  if (exact) {
+    const newUnlock = recordSuccess('raga', rgLevelIdx, rgScore, rgStreak);
+    if (newUnlock) {
+      setTimeout(() => {
+        showBigWin('🔓 New level unlocked!');
+        refreshLevelGrid('raga', RG_LEVELS, 'rgLevelGrid', rgLevelIdx, (i) => { rgLevelIdx = i; });
+      }, 400);
+    }
+  } else {
+    recordMiss('raga', rgLevelIdx);
+  }
+}
+
+function rgNext() { rgBeginRound(); }
+
+function rgQuit() {
+  document.getElementById('rgPlay').style.display = 'none';
+  document.getElementById('rgSetup').style.display = 'block';
+  refreshLevelGrid('raga', RG_LEVELS, 'rgLevelGrid', rgLevelIdx, (i) => { rgLevelIdx = i; });
+}
+
+function rgReset() { rgQuit(); }
+
+
+// ═══════════════════════════════════
+// SWARAM SHADOWING
+// ═══════════════════════════════════
+
+// 5 levels:
+// 1 — Follow Along: note plays AND button glows for 0.8s — just tap the lit one
+// 2 — Short Delay:  button glows for 0.4s then dims — tap from memory
+// 3 — No Glow, slow (3s timer): pure listening, generous time
+// 4 — No Glow, medium (2s timer)
+// 5 — No Glow, fast (1.2s timer, full scale)
+const SS_GAME_LEVELS = [
+  { id:1, name:'Follow Along', desc:'The button glows — just tap it!',         pool:['s','p','r','d'],                         timer:4000, glow:800,  streakNeeded:6  },
+  { id:2, name:'Quick Glance', desc:'Button glows briefly — then you decide.',  pool:['s','r','g','p','d','n'],                 timer:3500, glow:400,  streakNeeded:7  },
+  { id:3, name:'Listener',     desc:'No hints — hear and tap, 3 seconds.',      pool:['s','r','g','p','d','n'],                 timer:3000, glow:0,    streakNeeded:8  },
+  { id:4, name:'Sharp Ear',    desc:'Full scale, 2-second window.',             pool:['s','r','g','m','p','d','n','S'],         timer:2000, glow:0,    streakNeeded:10 },
+  { id:5, name:'Lightning',    desc:'Full scale, fast! Timer: 1.2 seconds.',   pool:['s','r','g','m','p','d','n','S'],         timer:1200, glow:0,    streakNeeded:999},
+];
+
+let ssRagaIdx     = 0;
+let ssLevelIdx    = 0;
+let ssScore       = 0;
+let ssStreak      = 0;
+let ssBestStreak  = 0;
+let ssCurrentKey  = null;
+let ssTimerHandle = null;
+let ssTimerStart  = null;
+let ssTimerDur    = 0;
+let ssActive      = false;
+let ssTotalAnswered = 0;
+let ssTotalCorrect  = 0;
+let ssLevelStreak   = 0;
+
+// ── Setup UI ──
+(function buildSsSetup() {
+  const rg = document.getElementById('ssRagaGrid');
+  RAGAS.forEach((raga, i) => {
+    const btn = document.createElement('div');
+    btn.className = 'varisai-item' + (i === 0 ? ' selected' : '');
+    btn.innerHTML = `<div style="font-size:14px;font-weight:600;color:var(--cream)">${raga.name}</div>
+                     <div style="font-size:11px;color:var(--cream-dim);margin-top:3px;letter-spacing:1px">${raga.scale}</div>`;
+    btn.onclick = () => {
+      rg.querySelectorAll('.varisai-item').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected'); ssRagaIdx = i;
+    };
+    rg.appendChild(btn);
+  });
+
+  const onSsLevelSelect = (i) => { ssLevelIdx = i; };
+  refreshLevelGrid('shadow', SS_GAME_LEVELS, 'ssLevelGrid', ssLevelIdx, onSsLevelSelect);
+})();
+
+const SS_MAX_LIVES = 3;
+
+let ssLives = SS_MAX_LIVES;
+
+function ssLivesDisplay() {
+  return '♥'.repeat(ssLives) + '♡'.repeat(SS_MAX_LIVES - ssLives);
+}
+
+function ssStart() {
+  ssScore = 0; ssStreak = 0; ssBestStreak = 0; ssLives = SS_MAX_LIVES;
+  ssTotalAnswered = 0; ssTotalCorrect = 0; ssLevelStreak = 0;
+  document.getElementById('ssSetup').style.display = 'none';
+  document.getElementById('ssOver').style.display = 'none';
+  document.getElementById('ssPlay').style.display = 'block';
+  const lv = SS_GAME_LEVELS[ssLevelIdx];
+  document.getElementById('ssLevelLabel').textContent = `Level ${lv.id} — ${lv.name}`;
+  ssUpdateHUD();
+  ssNextNote();
+}
+
+function ssUpdateHUD() {
+  document.getElementById('ssLivesDisplay').textContent = ssLivesDisplay();
+  document.getElementById('ssStreak').textContent = ssStreak >= 3 ? `🔥${ssStreak}` : ssStreak;
+  document.getElementById('ssScore').textContent = ssScore;
+}
+
+function ssNextNote() {
+  if (document.getElementById('ssPlay').style.display === 'none') return;
+  if (ssLives <= 0) return;
+  const lv = SS_GAME_LEVELS[ssLevelIdx];
+  const pool = lv.pool;
+  let key;
+  do { key = pool[Math.floor(Math.random() * pool.length)]; }
+  while (pool.length > 1 && key === ssCurrentKey);
+  ssCurrentKey = key;
+
+  // Play note
+  const raga = RAGAS[ssRagaIdx];
+  const semi = raga.semi[key] ?? 0;
+  const freq = MID_FREQS[selectedPitch] * Math.pow(2, semi / 12);
+  const ctx = getAudioCtx();
+  const osc = ctx.createOscillator(); const gain = ctx.createGain();
+  osc.connect(gain); gain.connect(masterOut);
+  osc.type = 'triangle'; osc.frequency.value = freq;
+  const t = ctx.currentTime;
+  gain.gain.setValueAtTime(0, t);
+  gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+  gain.gain.setValueAtTime(0.75, t + 0.5);
+  gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+  osc.start(t); osc.stop(t + 0.75);
+
+  document.getElementById('ssNoteDisplay').textContent = '?';
+  document.getElementById('ssNoteDisplay').style.color = 'var(--cream-dim)';
+  document.getElementById('ssNoteSub').textContent = '';
+  document.getElementById('ssFeedback').textContent = '';
+
+  ssBuildAnswerGrid(pool, key, lv.glow);
+
+  ssActive = true;
+  ssTimerDur = lv.timer;
+  ssTimerStart = performance.now();
+  const bar = document.getElementById('ssTimerBar');
+  bar.style.transition = 'none'; bar.style.width = '100%'; bar.style.background = 'var(--gold)';
+  bar.getBoundingClientRect();
+  bar.style.transition = `width ${ssTimerDur}ms linear`; bar.style.width = '0%';
+
+  ssTimerHandle = setTimeout(() => {
+    if (!ssActive) return;
+    ssActive = false;
+    ssMiss('⏱ Too slow!');
+  }, ssTimerDur);
+}
+
+function ssBuildAnswerGrid(pool, correctKey, glowMs) {
+  const raga = RAGAS[ssRagaIdx];
+  const grid = document.getElementById('ssAnswerGrid');
+  grid.innerHTML = '';
+  SWARAM_KEYS.forEach(key => {
+    if (!(key in raga.semi)) return;
+    const inPool = pool.includes(key);
+    const semi = raga.semi[key];
+    const label = rgVariantLabel(key, semi);
+    const btn = document.createElement('button');
+    btn.id = 'ssbtn-' + key;
+    btn.style.cssText = `background:var(--surface2);border:1px solid ${inPool ? 'var(--border)' : 'rgba(255,255,255,0.06)'};
+      color:${inPool ? 'var(--cream)' : 'var(--cream-dim)'};font-family:var(--font-body);
+      font-size:16px;font-weight:600;padding:14px 8px;
+      cursor:${inPool ? 'pointer' : 'default'};transition:all 0.15s;
+      border-radius:1px;text-align:center;letter-spacing:1px;opacity:${inPool ? '1' : '0.3'};`;
+    btn.textContent = label;
+    if (inPool) {
+      btn.onmouseover = () => { if (!btn.disabled) { btn.style.borderColor='var(--gold)'; btn.style.background='rgba(201,148,58,0.1)'; } };
+      btn.onmouseout  = () => { if (!btn.disabled) { btn.style.borderColor='var(--border)'; btn.style.background='var(--surface2)'; } };
+      btn.onclick = () => ssGuess(key);
+    }
+    grid.appendChild(btn);
+  });
+
+  if (glowMs > 0) {
+    const glowBtn = document.getElementById('ssbtn-' + correctKey);
+    if (glowBtn) {
+      glowBtn.style.borderColor = 'var(--gold)';
+      glowBtn.style.background = 'rgba(201,148,58,0.35)';
+      glowBtn.style.boxShadow = '0 0 16px rgba(201,148,58,0.5)';
+      setTimeout(() => {
+        if (glowBtn && !glowBtn.disabled) {
+          glowBtn.style.borderColor = 'var(--border)';
+          glowBtn.style.background = 'var(--surface2)';
+          glowBtn.style.boxShadow = '';
+        }
+      }, glowMs);
+    }
+  }
+}
+
+function ssGuess(key) {
+  if (!ssActive) return;
+  ssActive = false;
+  clearTimeout(ssTimerHandle);
+
+  const bar = document.getElementById('ssTimerBar');
+  const elapsed = performance.now() - ssTimerStart;
+  const remaining = Math.max(0, 1 - elapsed / ssTimerDur);
+  bar.style.transition = 'none'; bar.style.width = (remaining * 100) + '%';
+
+  const raga = RAGAS[ssRagaIdx];
+  const semi = raga.semi[ssCurrentKey];
+  const correctLabel = rgVariantLabel(ssCurrentKey, semi);
+
+  document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = true);
+  document.getElementById('ssNoteDisplay').textContent = correctLabel;
+
+  if (key === ssCurrentKey) {
+    document.getElementById('ssNoteDisplay').style.color = 'var(--gold-light)';
+    const correctBtn = document.getElementById('ssbtn-' + key);
+    if (correctBtn) { correctBtn.style.borderColor='var(--gold)'; correctBtn.style.background='rgba(201,148,58,0.2)'; }
+    ssHit(remaining);
+    setTimeout(() => ssNextNote(), 700);
+  } else {
+    document.getElementById('ssNoteDisplay').style.color = '#e06050';
+    const wrongBtn = document.getElementById('ssbtn-' + key);
+    if (wrongBtn) { wrongBtn.style.borderColor='var(--red)'; wrongBtn.style.background='rgba(192,58,42,0.2)'; }
+    ssMiss(`It was ${correctLabel}`);
+  }
+}
+
+function ssHit(remaining) {
+  ssTotalAnswered++; ssTotalCorrect++;
+  ssStreak++; ssLevelStreak++;
+  if (ssStreak > ssBestStreak) ssBestStreak = ssStreak;
+  const speedBonus = Math.ceil(remaining * 3);
+  const pts = 10 + (ssLevelIdx * 5) + speedBonus;
+  ssScore += pts;
+  showScorePop(document.getElementById('ssFeedback'), `+${pts}`);
+  celebrate(ssStreak, null);
+  document.getElementById('ssFeedback').style.color = 'var(--teal-light)';
+
+  // Save progress & check unlock
+  const newUnlock = recordSuccess('shadow', ssLevelIdx, ssScore, ssStreak);
+  if (newUnlock) {
+    setTimeout(() => {
+      showBigWin('🔓 New level unlocked!');
+      refreshLevelGrid('shadow', SS_GAME_LEVELS, 'ssLevelGrid', ssLevelIdx, (i) => { ssLevelIdx = i; });
+    }, 400);
+  }
+
+  // Internal level-up within a session
+  const lv = SS_GAME_LEVELS[ssLevelIdx];
+  if (ssLevelStreak >= lv.streakNeeded && ssLevelIdx < SS_GAME_LEVELS.length - 1) {
+    ssLevelIdx++; ssLevelStreak = 0;
+    const newLv = SS_GAME_LEVELS[ssLevelIdx];
+    const lbl = document.getElementById('ssLevelLabel');
+    lbl.textContent = `Level ${newLv.id} — ${newLv.name} 🎉`;
+    setTimeout(() => { lbl.textContent = `Level ${newLv.id} — ${newLv.name}`; }, 2000);
+  }
+  ssUpdateHUD();
+}
+
+function ssMiss(msg) {
+  ssTotalAnswered++;
+  ssStreak = 0;
+  ssLevelStreak = Math.max(0, ssLevelStreak - 2);
+  ssLives--;
+  recordMiss('shadow', ssLevelIdx);
+
+  const bar = document.getElementById('ssTimerBar');
+  bar.style.transition = 'none'; bar.style.width = '0%'; bar.style.background = 'var(--red)';
+  const raga = RAGAS[ssRagaIdx];
+  const correctLabel = rgVariantLabel(ssCurrentKey, raga.semi[ssCurrentKey]);
+  document.getElementById('ssNoteDisplay').textContent = correctLabel;
+  document.getElementById('ssNoteDisplay').style.color = '#e06050';
+  const correctBtn = document.getElementById('ssbtn-' + ssCurrentKey);
+  if (correctBtn) { correctBtn.style.borderColor='var(--red)'; correctBtn.style.background='rgba(192,58,42,0.2)'; }
+  document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = true);
+
+  document.getElementById('ssFeedback').textContent = msg;
+  document.getElementById('ssFeedback').style.color = '#e06050';
+  ssUpdateHUD();
+
+  if (ssLives <= 0) {
+    setTimeout(ssGameOver, 1000);
+  } else {
+    setTimeout(() => ssNextNote(), 1100);
+  }
+}
+
+function ssGameOver() {
+  clearTimeout(ssTimerHandle);
+  ssActive = false;
+  document.getElementById('ssPlay').style.display = 'none';
+  document.getElementById('ssOver').style.display = 'block';
+  const accuracy = ssTotalAnswered > 0 ? Math.round((ssTotalCorrect / ssTotalAnswered) * 100) : 0;
+  document.getElementById('ssFinalScore').textContent = ssScore;
+  document.getElementById('ssFinalLevel').textContent = ssLevelIdx + 1;
+  document.getElementById('ssFinalStreak').textContent = ssBestStreak;
+  document.getElementById('ssFinalAccuracy').textContent = accuracy + '%';
+  const msgs = [
+    [500, '✦ Incredible — lightning reflexes!'],
+    [300, 'Sharp ear — keep climbing!'],
+    [100, 'Good start — the notes are sticking.'],
+    [0,   'Every listen builds the connection. Keep going!'],
+  ];
+  document.getElementById('ssFinalMsg').textContent = msgs.find(([min]) => ssScore >= min)[1];
+}
+
+function ssQuit() {
+  clearTimeout(ssTimerHandle);
+  ssActive = false;
+  document.getElementById('ssPlay').style.display = 'none';
+  ssGameOver();
+}
+
+function ssReset() {
+  document.getElementById('ssOver').style.display = 'none';
+  document.getElementById('ssSetup').style.display = 'block';
+  refreshLevelGrid('shadow', SS_GAME_LEVELS, 'ssLevelGrid', ssLevelIdx, (i) => { ssLevelIdx = i; });
+}
+
+
+
+
+</script>
+</body>
+</html>

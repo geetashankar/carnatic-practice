@@ -766,7 +766,8 @@
         </div>
         <div id="qqAnswerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:8px;margin-bottom:14px;"></div>
         <div id="qqFeedback" style="text-align:center;font-size:17px;min-height:26px;font-style:italic;color:var(--teal-light);position:relative;overflow:visible;"></div>
-        <div style="text-align:center;margin-top:14px;">
+        <div style="text-align:center;margin-top:14px;display:flex;justify-content:center;gap:10px;">
+          <button id="qqPauseBtn" class="btn secondary" onclick="qqTogglePause()" style="font-size:13px;padding:8px 20px;">⏸ Pause</button>
           <button class="btn danger" onclick="qqStop()" style="font-size:13px;padding:8px 20px;">✕ Stop</button>
         </div>
       </div>
@@ -820,6 +821,27 @@
             <div class="metronome-beat" id="beatVisual" style="justify-content:flex-start;"></div>
             <div style="font-size:11px; color:var(--cream-dim); text-align:center; margin-top:4px; letter-spacing:1px;">Adi Tala</div>
           </div>
+        </div>
+        <div style="margin-top:12px; display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+          <span style="font-size:12px; letter-spacing:2px; text-transform:uppercase; color:var(--cream-dim);">Speed</span>
+          <div style="display:inline-flex; border:2px solid var(--border); border-radius:24px; overflow:hidden;">
+            <button id="speedBtn1" onclick="setSpeed(1)"
+              style="padding:6px 18px; font-family:var(--font-body); font-size:13px; font-weight:700;
+                     cursor:pointer; border:none; transition:all 0.2s; background:var(--teal); color:#fff;">
+              1st
+            </button>
+            <button id="speedBtn2" onclick="setSpeed(2)"
+              style="padding:6px 18px; font-family:var(--font-body); font-size:13px; font-weight:700;
+                     cursor:pointer; border:none; transition:all 0.2s; background:transparent; color:var(--cream-dim);">
+              2nd
+            </button>
+            <button id="speedBtn3" onclick="setSpeed(4)"
+              style="padding:6px 18px; font-family:var(--font-body); font-size:13px; font-weight:700;
+                     cursor:pointer; border:none; transition:all 0.2s; background:transparent; color:var(--cream-dim);">
+              3rd
+            </button>
+          </div>
+          <span id="speedLabel" style="font-size:12px; color:var(--cream-dim); font-style:italic;">base tempo</span>
         </div>
       </div>
 
@@ -887,6 +909,7 @@
         <div id="gameAnswerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px;"></div>
         <div id="gameFeedback" style="min-height:36px;font-size:18px;font-style:italic;color:var(--gold-light);text-align:center;padding:6px 0;position:relative;overflow:visible;"></div>
         <div class="btn-row" style="margin-top:12px;justify-content:center;">
+          <button id="gamePauseBtn" class="btn secondary" onclick="gameTogglePause()">⏸ Pause</button>
           <button class="btn danger" onclick="endGame()">✕ Quit</button>
         </div>
       </div>
@@ -911,7 +934,7 @@
       <div class="card">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:12px;">
           <div style="font-size:13px;color:var(--cream-dim);letter-spacing:1px;" id="rgLevelLabel"></div>
-          <div style="display:flex;gap:20px;align-items:center;">
+          <div id="rgStats" style="display:flex;gap:20px;align-items:center;">
             <div style="text-align:center;">
               <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Streak</div>
               <div style="font-family:var(--font-display);font-size:24px;color:var(--gold-light);" id="rgStreak">0</div>
@@ -935,6 +958,7 @@
         <div id="rgFeedback" style="display:none;padding:14px;border:1px solid var(--border);background:var(--surface2);margin-bottom:16px;font-size:14px;"></div>
         <div class="btn-row" style="justify-content:center;gap:16px;">
           <button class="btn primary" id="rgNextBtn" style="display:none;" onclick="rgNext()">▶ Next</button>
+          <button id="rgPauseBtn" class="btn secondary" onclick="rgTogglePause()">⏸ Pause</button>
           <button class="btn danger" onclick="rgQuit()">✕ Quit</button>
         </div>
       </div>
@@ -988,6 +1012,7 @@
         <div id="ssAnswerGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(90px,1fr));gap:8px;margin-bottom:16px;"></div>
         <div id="ssFeedback" style="text-align:center;font-size:18px;min-height:28px;font-style:italic;color:var(--gold-light);transition:opacity 0.3s;position:relative;overflow:visible;"></div>
         <div class="btn-row" style="justify-content:center;margin-top:16px;">
+          <button id="ssPauseBtn" class="btn secondary" onclick="ssTogglePause()">⏸ Pause</button>
           <button class="btn danger" onclick="ssQuit()">✕ Quit</button>
         </div>
       </div>
@@ -1227,11 +1252,63 @@ function qqStart() {
 function qqStop() {
   clearTimeout(qqTimer);
   qqActive = false;
+  qqPaused = false;
   document.getElementById('qqPlay').style.display = 'none';
   document.getElementById('qqIdle').style.display = 'block';
 }
 
+let qqPaused = false;
+let qqTimeRemaining = QQ_TIMER_MS;
+
+function qqTogglePause() {
+  const btn = document.getElementById('qqPauseBtn');
+  if (!qqPaused) {
+    // Pause
+    qqPaused = true;
+    clearTimeout(qqTimer);
+    qqActive = false;
+    qqTimeRemaining = Math.max(0, QQ_TIMER_MS - (performance.now() - qqTimerStart));
+    // Freeze timer bar
+    const bar = document.getElementById('qqTimerBar');
+    const pct = (qqTimeRemaining / QQ_TIMER_MS) * 100;
+    bar.style.transition = 'none';
+    bar.style.width = pct + '%';
+    // Disable answer buttons
+    document.querySelectorAll('#qqAnswerGrid button').forEach(b => b.disabled = true);
+    btn.textContent = '▶ Resume';
+    btn.classList.replace('secondary', 'primary');
+    document.getElementById('qqFeedback').textContent = '— paused —';
+    document.getElementById('qqFeedback').style.color = 'var(--cream-dim)';
+  } else {
+    // Resume
+    qqPaused = false;
+    qqActive = true;
+    document.querySelectorAll('#qqAnswerGrid button').forEach(b => b.disabled = false);
+    btn.textContent = '⏸ Pause';
+    btn.classList.replace('primary', 'secondary');
+    document.getElementById('qqFeedback').textContent = '';
+    // Re-animate bar for remaining time
+    qqTimerStart = performance.now() - (QQ_TIMER_MS - qqTimeRemaining);
+    const bar = document.getElementById('qqTimerBar');
+    bar.style.transition = 'none';
+    bar.style.width = (qqTimeRemaining / QQ_TIMER_MS * 100) + '%';
+    bar.getBoundingClientRect();
+    bar.style.transition = `width ${qqTimeRemaining}ms linear`;
+    bar.style.width = '0%';
+    qqTimer = setTimeout(() => {
+      if (!qqActive) return;
+      qqActive = false;
+      qqMiss('⏱ Too slow!');
+    }, qqTimeRemaining);
+  }
+}
+
 function qqNext() {
+  // Reset pause state for new round
+  qqPaused = false;
+  qqTimeRemaining = QQ_TIMER_MS;
+  const pb = document.getElementById('qqPauseBtn');
+  if (pb) { pb.textContent = '⏸ Pause'; pb.classList.remove('primary'); pb.classList.add('secondary'); }
   // Pick a random swaram, avoid repeat
   let idx;
   do { idx = Math.floor(Math.random() * SWARA_GRID.length); }
@@ -1886,6 +1963,8 @@ buildNoteDisplay();
 // METRONOME & TIMER
 // ═══════════════════════════════════
 let bpm = 80;
+let baseBpm = 80;
+let speedMultiplier = 1;
 let metronomeRunning = false;
 let metronomeTimeout = null;
 let beatIdx = 0;
@@ -1895,8 +1974,26 @@ let timerMax = 300;
 let timerInterval = null;
 
 function updateTempo(val) {
-  bpm = parseInt(val);
+  baseBpm = parseInt(val);
+  bpm = baseBpm * speedMultiplier;
   document.getElementById('tempoDisplay').textContent = bpm;
+  if (metronomeRunning) { stopMetronome(); startMetronome(); }
+}
+
+function setSpeed(multiplier) {
+  speedMultiplier = multiplier;
+  bpm = baseBpm * speedMultiplier;
+  document.getElementById('tempoDisplay').textContent = bpm;
+  // Update pill button styles
+  [1, 2, 4].forEach((m, i) => {
+    const btn = document.getElementById('speedBtn' + (i + 1));
+    if (!btn) return;
+    const active = m === multiplier;
+    btn.style.background = active ? 'var(--teal)' : 'transparent';
+    btn.style.color = active ? '#fff' : 'var(--cream-dim)';
+  });
+  const labels = { 1: 'base tempo', 2: '× 2 — 2nd speed', 4: '× 4 — 3rd speed' };
+  document.getElementById('speedLabel').textContent = labels[multiplier] || '';
   if (metronomeRunning) { stopMetronome(); startMetronome(); }
 }
 
@@ -2556,7 +2653,8 @@ function beginGameRound() {
 }
 
 function handleGameGuess(key) {
-  if (gameGuessIdx >= gameSequence.length) return; // stale click after round reset
+  if (gamePaused) return;
+  if (gameGuessIdx >= gameSequence.length) return;
   const correct = gameSequence[gameGuessIdx];
   if (!correct) return;
   const isRight = key === correct;
@@ -2652,10 +2750,32 @@ function endGame() {
   document.getElementById('gamePlay').style.display = 'none';
   document.getElementById('gameSetup').style.display = 'block';
   gameStreak = 0;
+  gamePaused = false;
   refreshLevelGrid('swara', GAME_LEVELS, 'gameLevelGrid', gameLevelIdx, (i) => { gameLevelIdx = i; });
 }
 
 function resetGame() { endGame(); }
+
+let gamePaused = false;
+
+function gameTogglePause() {
+  const btn = document.getElementById('gamePauseBtn');
+  gamePaused = !gamePaused;
+  if (gamePaused) {
+    btn.textContent = '▶ Resume';
+    btn.classList.replace('secondary', 'primary');
+    document.querySelectorAll('#gameAnswerGrid button').forEach(b => b.disabled = true);
+    document.getElementById('gamePlayBtn').disabled = true;
+    document.getElementById('gameFeedback').textContent = '— paused —';
+    document.getElementById('gameFeedback').style.color = 'var(--cream-dim)';
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.replace('primary', 'secondary');
+    document.querySelectorAll('#gameAnswerGrid button').forEach(b => b.disabled = false);
+    document.getElementById('gamePlayBtn').disabled = false;
+    document.getElementById('gameFeedback').textContent = '';
+  }
+}
 
 
 // ═══════════════════════════════════
@@ -2732,6 +2852,7 @@ function rgGenerateRound() {
 }
 
 function rgPlaySequence() {
+  if (rgPaused) return;
   const btn = document.getElementById('rgPlayBtn');
   btn.disabled = true; btn.textContent = '♩ Playing…';
   const spacing = 0.7;
@@ -2749,7 +2870,14 @@ function rgPlaySequence() {
     gain.gain.exponentialRampToValueAtTime(0.001, t + 0.6);
     osc.start(t); osc.stop(t + 0.65);
   });
-  setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Play Again'; }, rgSequence.length * spacing * 1000 + 400);
+  const finishMs = rgSequence.length * spacing * 1000 + 400;
+  const lv = RG_LEVELS[rgLevelIdx];
+  if (lv.reveal) {
+    // Level 1: reveal the answer after sequence finishes
+    setTimeout(() => rgReveal(), finishMs);
+  } else {
+    setTimeout(() => { btn.disabled = false; btn.textContent = '▶ Play Again'; }, finishMs);
+  }
 }
 
 function rgPlayRagaScale(ragaIdx) {
@@ -2852,8 +2980,10 @@ function rgBeginRound() {
   document.getElementById('rgHint').textContent = '';
   document.getElementById('rgPlayBtn').textContent = '▶ Play Sequence';
   document.getElementById('rgPlayBtn').disabled = false;
-  document.getElementById('rgScore').textContent = rgScore;
-  document.getElementById('rgStreak').textContent = rgStreak >= 3 ? `🔥${rgStreak}` : rgStreak;
+
+  // Hide score/streak on Level 1 — no points awarded
+  const statsEl = document.getElementById('rgStats');
+  if (statsEl) statsEl.style.display = lv.reveal ? 'none' : '';
 
   // Sequence display
   const seqEl = document.getElementById('rgSeqDisplay');
@@ -2864,18 +2994,15 @@ function rgBeginRound() {
   ).join('');
 
   if (lv.reveal) {
-    // Level 1: clear choice grid, auto-reveal after sequence plays
+    // Level 1: show "listening" state, wait for user to tap Play
     document.getElementById('rgChoices').innerHTML =
       `<div style="text-align:center;color:var(--cream-dim);font-style:italic;padding:16px;">
-        🎧 Listen carefully…
+        🎧 Press Play to hear the sequence, then the raga will be revealed…
       </div>`;
-    setTimeout(() => {
-      rgPlaySequence();
-      // Reveal after sequence finishes playing
-      const revealDelay = rgSequence.length * 700 + 900;
-      setTimeout(() => rgReveal(), revealDelay);
-    }, 400);
+    // Do NOT auto-play — user presses Play button themselves
   } else {
+    document.getElementById('rgScore').textContent = rgScore;
+    document.getElementById('rgStreak').textContent = rgStreak >= 3 ? `🔥${rgStreak}` : rgStreak;
     rgBuildChoices();
     setTimeout(rgPlaySequence, 500);
   }
@@ -2914,9 +3041,7 @@ function rgReveal() {
 
   document.getElementById('rgHint').textContent = 'Listen to the scale, then tap Next to try another!';
   document.getElementById('rgNextBtn').style.display = 'inline-block';
-
-  // Auto-play the scale so students hear it immediately
-  setTimeout(() => rgPlayRagaScale(ragaIdx), 300);
+  // No auto-play — user taps "Hear the full scale" when ready
 }
 
 function rgSubmit() {
@@ -2995,10 +3120,31 @@ function rgNext() { rgBeginRound(); }
 function rgQuit() {
   document.getElementById('rgPlay').style.display = 'none';
   document.getElementById('rgSetup').style.display = 'block';
+  rgPaused = false;
   refreshLevelGrid('raga', RG_LEVELS, 'rgLevelGrid', rgLevelIdx, (i) => { rgLevelIdx = i; });
 }
 
 function rgReset() { rgQuit(); }
+
+let rgPaused = false;
+
+function rgTogglePause() {
+  const btn = document.getElementById('rgPauseBtn');
+  rgPaused = !rgPaused;
+  if (rgPaused) {
+    btn.textContent = '▶ Resume';
+    btn.classList.replace('secondary', 'primary');
+    document.querySelectorAll('#rgChoices button, #rgChoices div[onclick]').forEach(b => b.style.pointerEvents = 'none');
+    document.getElementById('rgSubmitBtn').disabled = true;
+    document.getElementById('rgPlayBtn') && (document.getElementById('rgPlayBtn').disabled = true);
+  } else {
+    btn.textContent = '⏸ Pause';
+    btn.classList.replace('primary', 'secondary');
+    document.querySelectorAll('#rgChoices button, #rgChoices div[onclick]').forEach(b => b.style.pointerEvents = '');
+    document.getElementById('rgSubmitBtn').disabled = false;
+    document.getElementById('rgPlayBtn') && (document.getElementById('rgPlayBtn').disabled = false);
+  }
+}
 
 
 // ═══════════════════════════════════
@@ -3061,6 +3207,9 @@ function ssLivesDisplay() {
 function ssStart() {
   ssScore = 0; ssStreak = 0; ssBestStreak = 0; ssLives = SS_MAX_LIVES;
   ssTotalAnswered = 0; ssTotalCorrect = 0; ssLevelStreak = 0;
+  ssPaused = false;
+  const pb = document.getElementById('ssPauseBtn');
+  if (pb) { pb.textContent = '⏸ Pause'; pb.classList.remove('primary'); pb.classList.add('secondary'); }
   document.getElementById('ssSetup').style.display = 'none';
   document.getElementById('ssOver').style.display = 'none';
   document.getElementById('ssPlay').style.display = 'block';
@@ -3166,7 +3315,7 @@ function ssBuildAnswerGrid(pool, correctKey, glowMs) {
 }
 
 function ssGuess(key) {
-  if (!ssActive) return;
+  if (ssPaused || !ssActive) return;
   ssActive = false;
   clearTimeout(ssTimerHandle);
 
@@ -3285,7 +3434,52 @@ function ssQuit() {
 function ssReset() {
   document.getElementById('ssOver').style.display = 'none';
   document.getElementById('ssSetup').style.display = 'block';
+  ssPaused = false;
   refreshLevelGrid('shadow', SS_GAME_LEVELS, 'ssLevelGrid', ssLevelIdx, (i) => { ssLevelIdx = i; });
+}
+
+let ssPaused = false;
+let ssTimeRemaining = 0;
+
+function ssTogglePause() {
+  const btn = document.getElementById('ssPauseBtn');
+  ssPaused = !ssPaused;
+  if (ssPaused) {
+    // Pause: freeze timer, disable buttons
+    clearTimeout(ssTimerHandle);
+    ssTimeRemaining = Math.max(0, ssTimerDur - (performance.now() - ssTimerStart));
+    ssActive = false;
+    const bar = document.getElementById('ssTimerBar');
+    const pct = (ssTimeRemaining / ssTimerDur) * 100;
+    bar.style.transition = 'none';
+    bar.style.width = pct + '%';
+    document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = true);
+    btn.textContent = '▶ Resume';
+    btn.classList.replace('secondary', 'primary');
+    document.getElementById('ssFeedback').textContent = '— paused —';
+    document.getElementById('ssFeedback').style.color = 'var(--cream-dim)';
+  } else {
+    // Resume: re-enable and restart timer for remaining duration
+    ssPaused = false;
+    ssActive = true;
+    document.querySelectorAll('#ssAnswerGrid button').forEach(b => b.disabled = false);
+    btn.textContent = '⏸ Pause';
+    btn.classList.replace('primary', 'secondary');
+    document.getElementById('ssFeedback').textContent = '';
+    // Reanimate timer bar
+    ssTimerStart = performance.now() - (ssTimerDur - ssTimeRemaining);
+    const bar = document.getElementById('ssTimerBar');
+    bar.style.transition = 'none';
+    bar.style.width = (ssTimeRemaining / ssTimerDur * 100) + '%';
+    bar.getBoundingClientRect();
+    bar.style.transition = `width ${ssTimeRemaining}ms linear`;
+    bar.style.width = '0%';
+    ssTimerHandle = setTimeout(() => {
+      if (!ssActive) return;
+      ssActive = false;
+      ssMiss('⏱ Too slow!');
+    }, ssTimeRemaining);
+  }
 }
 
 

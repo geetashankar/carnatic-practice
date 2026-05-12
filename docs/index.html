@@ -643,6 +643,43 @@
 </head>
 <body>
 
+<!-- ── Site-wide password gate ── -->
+<div id="siteGate" style="
+  position:fixed;inset:0;z-index:9999;
+  background:var(--bg);
+  display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:0;">
+  <div style="
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:20px;padding:48px 40px;max-width:380px;width:90%;
+    text-align:center;box-shadow:0 24px 64px rgba(0,0,0,0.5);">
+    <div style="font-size:48px;margin-bottom:12px;">🎵</div>
+    <div style="font-family:var(--font-display);font-size:28px;font-weight:800;
+      color:var(--saffron);letter-spacing:1px;margin-bottom:4px;">Svara</div>
+    <div style="font-size:13px;color:var(--cream-dim);letter-spacing:2px;
+      text-transform:uppercase;margin-bottom:28px;">Carnatic Practice Companion</div>
+    <input id="sitePassword" type="password" placeholder="Enter password"
+      style="width:100%;box-sizing:border-box;
+        background:var(--surface2);border:1px solid var(--border);
+        border-radius:10px;color:var(--cream);font-family:var(--font-body);
+        font-size:16px;padding:12px 16px;outline:none;text-align:center;
+        letter-spacing:3px;margin-bottom:12px;"
+      onkeydown="if(event.key==='Enter')siteUnlock()">
+    <button onclick="siteUnlock()" style="
+      width:100%;padding:13px;border:none;border-radius:10px;
+      background:var(--saffron);color:#fff;font-family:var(--font-body);
+      font-size:15px;font-weight:700;cursor:pointer;letter-spacing:1px;
+      transition:opacity 0.2s;"
+      onmouseover="this.style.opacity='0.88'"
+      onmouseout="this.style.opacity='1'">Enter</button>
+    <div id="siteGateError" style="color:#f87171;font-size:13px;
+      margin-top:12px;display:none;">Incorrect password. Try again.</div>
+  </div>
+</div>
+
+<!-- Main app (hidden until unlocked) -->
+<div id="siteApp" style="display:none;">
+
 <header>
   <div class="header-ornament">Carnatic Practice Companion</div>
   <h1>Svara</h1>
@@ -687,6 +724,7 @@
   <button onclick="switchTab('game')">🎯 Swarasthanam</button>
   <button onclick="switchTab('ragagame')">🎼 Guess the Ragam</button>
   <button onclick="switchTab('shadow')">⚡ Shadowing</button>
+  <button onclick="switchTab('assess')">📋 Assessment</button>
 </nav>
 
 <!-- GLOBAL TANPURA BAR -->
@@ -1033,15 +1071,166 @@
       </div>
     </div>
   </div>
+  <!-- ═══════════════════════════════════════════════
+       TAB 6: TEACHER ASSESSMENT
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-assess" class="tab-panel">
 
+    <!-- Password gate -->
+    <div id="assessGate" class="card" style="max-width:420px;margin:40px auto;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🔐</div>
+      <div class="card-title" style="margin-bottom:6px;">Teachers Only</div>
+      <p class="info-text" style="margin-bottom:20px;">Enter the teacher password to access assessments.</p>
+      <input id="assessPassword" type="password" placeholder="Password"
+        style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);
+        border-radius:8px;color:var(--cream);font-family:var(--font-body);font-size:15px;
+        padding:10px 14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:2px;"
+        onkeydown="if(event.key==='Enter') assessUnlock()">
+      <button class="btn primary" onclick="assessUnlock()" style="width:100%;padding:12px;">Unlock</button>
+      <div id="assessGateError" style="color:#f87171;font-size:13px;margin-top:10px;display:none;">Incorrect password. Try again.</div>
+    </div>
+
+    <!-- Everything below is hidden until unlocked -->
+    <div id="assessContent" style="display:none;">
+    <div class="card" style="border:2px solid var(--saffron);background:rgba(249,115,22,0.04);">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+        <div style="font-size:28px;">📋</div>
+        <div>
+          <div class="card-title" style="margin-bottom:2px;">Student Assessment — Swarasthanam</div>
+          <div style="font-size:13px;color:var(--cream-dim);">10 questions · For teachers only · Copy results to Google Doc</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Setup -->
+    <div id="assessSetup" class="card">
+      <div class="card-title">Assessment Setup</div>
+      <p class="info-text" style="margin-bottom:20px;">Enter the student's name, then start. The correct answers are shown on screen for you. The student calls out their answer — you mark it right or wrong.</p>
+      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:20px;">
+        <label style="font-size:13px;color:var(--cream-dim);letter-spacing:1px;">Student name:</label>
+        <input id="assessStudentName" type="text" placeholder="e.g. Priya" style="
+          background:var(--surface2);border:1px solid var(--border);border-radius:8px;
+          color:var(--cream);font-family:var(--font-body);font-size:15px;
+          padding:8px 14px;width:220px;outline:none;">
+      </div>
+      <button class="btn primary" onclick="assessStart()" style="font-size:15px;padding:12px 32px;">▶ Begin Assessment</button>
+    </div>
+
+    <!-- In-progress -->
+    <div id="assessPlay" style="display:none;">
+      <div class="card">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:16px;">
+          <div>
+            <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);">Student</div>
+            <div style="font-family:var(--font-display);font-size:22px;color:var(--saffron);" id="assessNameDisplay"></div>
+          </div>
+          <div style="display:flex;gap:20px;">
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Question</div>
+              <div style="font-family:var(--font-display);font-size:28px;color:var(--gold-light);" id="assessQNum">1 / 10</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:10px;letter-spacing:2px;color:var(--cream-dim);text-transform:uppercase;">Score</div>
+              <div style="font-family:var(--font-display);font-size:28px;color:var(--teal-light);" id="assessScoreDisplay">0 / 0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Note type label -->
+        <div id="assessTypeLabel" style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:10px;"></div>
+
+        <!-- Answer display (teacher sees correct answer) -->
+        <div style="background:rgba(14,165,160,0.08);border:1px solid var(--teal-dim);border-radius:12px;padding:20px;margin-bottom:20px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:var(--teal-dim);margin-bottom:10px;">✓ Correct answer</div>
+          <div id="assessCorrectDisplay" style="display:flex;flex-wrap:wrap;gap:10px;align-items:center;"></div>
+        </div>
+
+        <!-- Play button -->
+        <div style="display:flex;gap:12px;align-items:center;margin-bottom:20px;flex-wrap:wrap;">
+          <button class="btn primary" id="assessPlayBtn" onclick="assessPlayNote()" style="font-size:15px;padding:12px 28px;">▶ Play Note(s)</button>
+          <span style="font-size:13px;color:var(--cream-dim);font-style:italic;">Play as many times as needed</span>
+        </div>
+
+        <!-- Mark answer -->
+        <div style="font-size:13px;letter-spacing:1px;color:var(--cream-dim);margin-bottom:10px;text-transform:uppercase;">Student's answer:</div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+          <button class="btn" onclick="assessMark(true)" style="background:rgba(14,165,160,0.15);border-color:var(--teal);color:var(--teal-light);font-size:15px;padding:12px 28px;">✓ Correct</button>
+          <button class="btn" onclick="assessRevealWrongInput()" id="assessWrongBtn" style="background:rgba(244,63,94,0.1);border-color:var(--red);color:#f87171;font-size:15px;padding:12px 28px;">✗ Wrong</button>
+        </div>
+
+        <!-- Wrong answer input — shown after clicking Wrong -->
+        <div id="assessWrongInput" style="display:none;margin-top:16px;background:rgba(244,63,94,0.06);border:1px solid var(--red);border-radius:12px;padding:16px;">
+          <div style="font-size:12px;letter-spacing:2px;text-transform:uppercase;color:#f87171;margin-bottom:10px;">What did the student say?</div>
+          <input id="assessWrongText" type="text" placeholder="e.g. G3, or Sa then Pa, or D1 D2…"
+            style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);
+            border-radius:8px;color:var(--cream);font-family:var(--font-body);font-size:15px;
+            padding:10px 14px;outline:none;margin-bottom:12px;">
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn" onclick="assessMark(false)" style="background:rgba(244,63,94,0.15);border-color:var(--red);color:#f87171;padding:10px 22px;">
+              Confirm Wrong
+            </button>
+            <button class="btn" onclick="assessHideWrongInput()" style="font-size:13px;padding:10px 16px;color:var(--cream-dim);">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Progress bar -->
+      <div class="card" style="padding:12px 20px;">
+        <div id="assessProgress" style="display:flex;gap:8px;flex-wrap:wrap;"></div>
+      </div>
+    </div>
+
+    <!-- Results -->
+    <div id="assessResults" style="display:none;">
+      <div class="card">
+        <div class="card-title">Assessment Complete</div>
+        <div id="assessSummaryLine" style="font-size:18px;color:var(--gold-light);margin-bottom:20px;"></div>
+        <div id="assessAnalysis" style="font-size:14px;line-height:1.8;color:var(--cream);margin-bottom:24px;"></div>
+        <div style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:16px;margin-bottom:20px;">
+          <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--cream-dim);margin-bottom:8px;">Copy to Google Doc ↓</div>
+          <pre id="assessCopyText" style="font-family:monospace;font-size:13px;color:var(--cream);white-space:pre-wrap;line-height:1.6;margin:0;"></pre>
+        </div>
+        <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <button class="btn primary" onclick="assessCopy()">📋 Copy to Clipboard</button>
+          <button class="btn" onclick="assessRestart()">↺ New Assessment</button>
+        </div>
+        <div id="assessCopied" style="font-size:13px;color:var(--teal-light);margin-top:8px;display:none;">✓ Copied!</div>
+      </div>
+    </div>
+  </div> <!-- end assessContent -->
+  </div> <!-- end tab-assess -->
 
 </main>
 
 <script>
 // ═══════════════════════════════════
+// SITE PASSWORD GATE
+// ═══════════════════════════════════
+function siteUnlock() {
+  const val = document.getElementById('sitePassword').value;
+  if (val === 'Geetanjali') {
+    document.getElementById('siteGate').style.display = 'none';
+    document.getElementById('siteApp').style.display = 'block';
+  } else {
+    document.getElementById('siteGateError').style.display = 'block';
+    document.getElementById('sitePassword').value = '';
+    document.getElementById('sitePassword').focus();
+  }
+}
+
+// ═══════════════════════════════════
 // TAB NAVIGATION
 // ═══════════════════════════════════
 function switchTab(id) {
+  // Re-lock assessment tab whenever navigating away
+  if (id !== 'assess') {
+    document.getElementById('assessGate').style.display = 'block';
+    document.getElementById('assessContent').style.display = 'none';
+    document.getElementById('assessPassword').value = '';
+    document.getElementById('assessGateError').style.display = 'none';
+  }
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
   document.getElementById('tab-' + id).classList.add('active');
@@ -3484,7 +3673,302 @@ function ssTogglePause() {
 
 
 
+// ═══════════════════════════════════
+// TEACHER ASSESSMENT
+// ═══════════════════════════════════
+// 10 questions: 4× single note, 3× two notes, 3× three notes
+// Teacher plays, marks correct/wrong, gets analysis at the end
 
+const ASSESS_PLAN = [
+  ...Array(4).fill(1),   // 4 single-note questions
+  ...Array(3).fill(2),   // 3 two-note questions
+  ...Array(3).fill(3),   // 3 three-note questions
+];
+
+let assessQuestions  = [];   // [{noteCount, notes:[SWARA_GRID items]}]
+let assessAnswers    = [];   // true/false per question
+let assessWrongTexts = [];   // string per question (empty string if correct)
+let assessQIdx       = 0;
+let assessStudentName = '';
+
+function assessUnlock() {
+  const val = document.getElementById('assessPassword').value;
+  if (val === 'GeetanjaliGuru') {
+    document.getElementById('assessGate').style.display = 'none';
+    document.getElementById('assessContent').style.display = 'block';
+    document.getElementById('assessGateError').style.display = 'none';
+    document.getElementById('assessPassword').value = '';
+  } else {
+    document.getElementById('assessGateError').style.display = 'block';
+    document.getElementById('assessPassword').value = '';
+    document.getElementById('assessPassword').focus();
+  }
+}
+
+
+function assessBuildQuestions() {
+  // Shuffle plan so question types are interleaved
+  const plan = [...ASSESS_PLAN].sort(() => Math.random() - 0.5);
+  return plan.map(count => {
+    const pool = [...SWARA_GRID].sort(() => Math.random() - 0.5);
+    const notes = pool.slice(0, count);
+    return { noteCount: count, notes };
+  });
+}
+
+function assessStart() {
+  const nameInput = document.getElementById('assessStudentName');
+  assessStudentName = nameInput.value.trim() || 'Student';
+  assessQuestions = assessBuildQuestions();
+  assessAnswers = [];
+  assessWrongTexts = [];
+  assessQIdx = 0;
+
+  document.getElementById('assessSetup').style.display = 'none';
+  document.getElementById('assessResults').style.display = 'none';
+  document.getElementById('assessPlay').style.display = 'block';
+  document.getElementById('assessNameDisplay').textContent = assessStudentName;
+
+  assessRenderProgress();
+  assessShowQuestion();
+}
+
+function assessShowQuestion() {
+  const q = assessQuestions[assessQIdx];
+  const total = assessQuestions.length;
+  document.getElementById('assessQNum').textContent = `${assessQIdx + 1} / ${total}`;
+  document.getElementById('assessScoreDisplay').textContent =
+    `${assessAnswers.filter(Boolean).length} / ${assessAnswers.length}`;
+
+  const typeLabels = { 1: '🎵 Single Note', 2: '🎵🎵 Two Notes — in order', 3: '🎵🎵🎵 Three Notes — in order' };
+  document.getElementById('assessTypeLabel').textContent = typeLabels[q.noteCount] || '';
+
+  // Correct answer display
+  const display = document.getElementById('assessCorrectDisplay');
+  display.innerHTML = q.notes.map((sw, i) =>
+    `<div style="display:flex;align-items:center;gap:6px;">
+      ${i > 0 ? '<span style="color:var(--cream-dim);font-size:18px;">→</span>' : ''}
+      <div style="
+        background:var(--surface2);border:2px solid var(--teal);border-radius:8px;
+        padding:10px 16px;font-family:var(--font-display);font-size:22px;
+        color:var(--teal-light);font-weight:700;min-width:60px;text-align:center;">
+        ${sw.name}${sw.line2 ? `<span style="font-size:13px;color:var(--cream-dim);display:block;margin-top:2px;">${sw.line2}</span>` : ''}
+      </div>
+    </div>`
+  ).join('');
+
+  // Reset play button
+  document.getElementById('assessPlayBtn').disabled = false;
+  document.getElementById('assessPlayBtn').textContent = '▶ Play Note(s)';
+  assessHideWrongInput();
+}
+
+function assessRevealWrongInput() {
+  document.getElementById('assessWrongInput').style.display = 'block';
+  document.getElementById('assessWrongText').value = '';
+  document.getElementById('assessWrongText').focus();
+}
+
+function assessHideWrongInput() {
+  document.getElementById('assessWrongInput').style.display = 'none';
+  document.getElementById('assessWrongText').value = '';
+}
+
+function assessPlayNote() {
+  const q = assessQuestions[assessQIdx];
+  const btn = document.getElementById('assessPlayBtn');
+  btn.disabled = true; btn.textContent = '♩ Playing…';
+
+  const spacing = 0.75;
+  q.notes.forEach((sw, i) => {
+    const freq = MID_FREQS[selectedPitch] * Math.pow(2, sw.semi / 12);
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    const t = ctx.currentTime + i * spacing;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+    gain.gain.setValueAtTime(0.75, t + 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    osc.start(t); osc.stop(t + 0.75);
+  });
+
+  const doneMs = q.notes.length * spacing * 1000 + 300;
+  setTimeout(() => {
+    btn.disabled = false;
+    btn.textContent = '▶ Play Again';
+  }, doneMs);
+}
+
+function assessMark(correct) {
+  const wrongText = correct ? '' : (document.getElementById('assessWrongText').value.trim());
+  assessAnswers.push(correct);
+  assessWrongTexts.push(wrongText);
+  assessHideWrongInput();
+  assessRenderProgress();
+
+  assessQIdx++;
+  if (assessQIdx >= assessQuestions.length) {
+    assessShowResults();
+  } else {
+    assessShowQuestion();
+  }
+}
+
+function assessRenderProgress() {
+  const el = document.getElementById('assessProgress');
+  el.innerHTML = assessQuestions.map((q, i) => {
+    let bg = 'var(--surface2)', border = 'var(--border)', icon = '';
+    if (i < assessAnswers.length) {
+      bg = assessAnswers[i] ? 'rgba(14,165,160,0.2)' : 'rgba(244,63,94,0.15)';
+      border = assessAnswers[i] ? 'var(--teal)' : 'var(--red)';
+      icon = assessAnswers[i] ? '✓' : '✗';
+    } else if (i === assessQIdx) {
+      border = 'var(--gold)'; bg = 'rgba(201,148,58,0.1)';
+    }
+    return `<div style="
+      width:36px;height:36px;border-radius:8px;border:2px solid ${border};
+      background:${bg};display:flex;align-items:center;justify-content:center;
+      font-size:13px;font-weight:700;color:${assessAnswers[i] ? 'var(--teal-light)' : '#f87171'};">
+      ${icon || (i + 1)}
+    </div>`;
+  }).join('');
+}
+
+function assessShowResults() {
+  document.getElementById('assessPlay').style.display = 'none';
+  document.getElementById('assessResults').style.display = 'block';
+
+  const total = assessQuestions.length;
+  const correct = assessAnswers.filter(Boolean).length;
+  const pct = Math.round(correct / total * 100);
+  document.getElementById('assessSummaryLine').textContent =
+    `${assessStudentName} scored ${correct} / ${total} (${pct}%)`;
+
+  // Analyse wrong questions
+  const wrongQs = assessQuestions.filter((_, i) => !assessAnswers[i]);
+  const allWrongNotes = wrongQs.flatMap(q => q.notes);
+
+  // Count note frequency in wrong answers
+  const noteCounts = {};
+  allWrongNotes.forEach(sw => {
+    noteCounts[sw.name] = (noteCounts[sw.name] || 0) + 1;
+  });
+  const sortedWeak = Object.entries(noteCounts).sort((a, b) => b[1] - a[1]);
+
+  // Break wrong by question type
+  const wrongByType = { 1: 0, 2: 0, 3: 0 };
+  const totalByType = { 1: 0, 2: 0, 3: 0 };
+  assessQuestions.forEach((q, i) => {
+    totalByType[q.noteCount]++;
+    if (!assessAnswers[i]) wrongByType[q.noteCount]++;
+  });
+
+  // Build analysis text
+  let analysis = '';
+
+  // Build confusion pairs from wrong text
+  const confusions = []; // [{correct: "G3", said: "M1"}]
+  assessQuestions.forEach((q, i) => {
+    if (!assessAnswers[i] && assessWrongTexts[i]) {
+      const correctNames = q.notes.map(sw => sw.line2 ? `${sw.name}/${sw.line2}` : sw.name).join(' → ');
+      confusions.push({ correct: correctNames, said: assessWrongTexts[i] });
+    }
+  });
+
+  if (correct === total) {
+    analysis = '🌟 Perfect score! The student identified all notes correctly across single, double, and triple sequences.';
+  } else {
+    const lines = [];
+    if (wrongByType[1] > 0)
+      lines.push(`• <strong>${wrongByType[1]}/${totalByType[1]}</strong> single-note questions missed — difficulty with basic note recognition.`);
+    if (wrongByType[2] > 0)
+      lines.push(`• <strong>${wrongByType[2]}/${totalByType[2]}</strong> two-note sequences missed — difficulty retaining or ordering two swarams.`);
+    if (wrongByType[3] > 0)
+      lines.push(`• <strong>${wrongByType[3]}/${totalByType[3]}</strong> three-note sequences missed — difficulty with short melodic memory.`);
+
+    if (sortedWeak.length > 0) {
+      const topWeak = sortedWeak.slice(0, 3).map(([n, c]) => `${n} (×${c})`).join(', ');
+      lines.push(`• Notes appearing most in wrong answers: <strong>${topWeak}</strong>.`);
+    }
+
+    // Specific confusions
+    if (confusions.length > 0) {
+      lines.push(`• <strong>Specific confusions recorded:</strong>`);
+      confusions.forEach(c => {
+        lines.push(`&nbsp;&nbsp;&nbsp;— Heard <strong>${c.correct}</strong>, said <em>"${c.said}"</em>`);
+      });
+    }
+
+    // Sequence-length pattern
+    if (wrongByType[1] === 0 && (wrongByType[2] > 0 || wrongByType[3] > 0))
+      lines.push(`• Single notes are solid. Struggles emerge when holding <strong>sequences in memory</strong> — focus on 2-note then 3-note practice.`);
+    if (wrongByType[3] > wrongByType[2] && wrongByType[2] > 0)
+      lines.push(`• Performance degrades with sequence length — suggests a <strong>working memory</strong> challenge rather than pitch recognition.`);
+    if (wrongByType[1] > 0 && wrongByType[2] === 0 && wrongByType[3] === 0)
+      lines.push(`• Sequences are fine but isolated note identification needs work — consider more <strong>Shruti & Quick Quiz</strong> practice.`);
+
+    analysis = lines.join('<br>');
+  }
+
+  document.getElementById('assessAnalysis').innerHTML = analysis;
+
+  // Build plain-text copy block
+  const date = new Date().toLocaleDateString('en-IN', { day:'numeric', month:'long', year:'numeric' });
+  const qLines = assessQuestions.map((q, i) => {
+    const noteNames = q.notes.map(sw => sw.line2 ? `${sw.name}/${sw.line2}` : sw.name).join(' → ');
+    const result = assessAnswers[i] ? '✓' : '✗';
+    const wrongNote = assessWrongTexts[i] ? `  (said: ${assessWrongTexts[i]})` : '';
+    return `  Q${i+1} [${q.noteCount} note${q.noteCount>1?'s':''}]  ${result}  ${noteNames}${wrongNote}`;
+  }).join('\n');
+
+  const confusionLines = confusions.length > 0
+    ? '\nCONFUSIONS\n──────────────────────────────────────\n' +
+      confusions.map(c => `  Correct: ${c.correct}\n  Said:    ${c.said}`).join('\n\n') + '\n'
+    : '';
+
+  const plainAnalysis = analysis
+    .replace(/<strong>/g, '').replace(/<\/strong>/g, '')
+    .replace(/<em>/g, '').replace(/<\/em>/g, '')
+    .replace(/<br>/g, '\n  ').replace(/&nbsp;/g, ' ')
+    .replace(/•/g, '•');
+
+  const copyText =
+`══════════════════════════════════════
+SWARASTHANAM ASSESSMENT
+══════════════════════════════════════
+Student : ${assessStudentName}
+Date    : ${date}
+Score   : ${correct} / ${total} (${pct}%)
+Shruti  : ${selectedPitch}
+
+QUESTIONS
+──────────────────────────────────────
+${qLines}
+${confusionLines}
+ANALYSIS
+──────────────────────────────────────
+  ${plainAnalysis}
+══════════════════════════════════════`;
+
+  document.getElementById('assessCopyText').textContent = copyText;
+}
+
+function assessCopy() {
+  const text = document.getElementById('assessCopyText').textContent;
+  navigator.clipboard.writeText(text).then(() => {
+    const el = document.getElementById('assessCopied');
+    el.style.display = 'block';
+    setTimeout(() => el.style.display = 'none', 2000);
+  });
+}
+
+function assessRestart() {
+  document.getElementById('assessResults').style.display = 'none';
+  document.getElementById('assessSetup').style.display = 'block';
+}
 </script>
+</div> <!-- end siteApp -->
 </body>
 </html>

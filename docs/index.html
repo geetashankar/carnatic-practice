@@ -725,6 +725,7 @@
   <button onclick="switchTab('ragagame')">🎼 Guess the Ragam</button>
   <button onclick="switchTab('shadow')">⚡ Shadowing</button>
   <button onclick="switchTab('assess')">📋 Assessment</button>
+  <button onclick="switchTab('benchmark')">📊 Benchmark</button>
 </nav>
 
 <!-- GLOBAL TANPURA BAR -->
@@ -768,7 +769,7 @@
 
     <div class="card">
       <div class="card-title">Practice Swarasthanam</div>
-      <p class="info-text">Click any swaram to hear it against your selected Sa. Use this to tune your voice or instrument.</p>
+      <p class="info-text">Click and hold any swaram to hear it against your selected Sa. Release to stop. Use this to tune your voice or instrument.</p>
       <div id="swaraGrid" style="margin-top:20px;"></div>
       <div class="status-bar" style="margin-top:16px;">
         <span>Playing:</span>
@@ -1202,6 +1203,48 @@
   </div> <!-- end assessContent -->
   </div> <!-- end tab-assess -->
 
+  <!-- ═══════════════════════════════════════════════
+       TAB 7: BENCHMARK
+  ═══════════════════════════════════════════════ -->
+  <div id="tab-benchmark" class="tab-panel">
+
+    <!-- Password gate -->
+    <div id="benchGate" class="card" style="max-width:420px;margin:40px auto;text-align:center;">
+      <div style="font-size:36px;margin-bottom:12px;">🔐</div>
+      <div class="card-title" style="margin-bottom:6px;">Teachers Only</div>
+      <p class="info-text" style="margin-bottom:20px;">Enter the teacher password to access benchmarks.</p>
+      <input id="benchPassword" type="password" placeholder="Password"
+        style="width:100%;box-sizing:border-box;background:var(--surface2);border:1px solid var(--border);
+        border-radius:8px;color:var(--cream);font-family:var(--font-body);font-size:15px;
+        padding:10px 14px;outline:none;margin-bottom:12px;text-align:center;letter-spacing:2px;"
+        onkeydown="if(event.key==='Enter') benchUnlock()">
+      <button class="btn primary" onclick="benchUnlock()" style="width:100%;padding:12px;">Unlock</button>
+      <div id="benchGateError" style="color:#f87171;font-size:13px;margin-top:10px;display:none;">Incorrect password. Try again.</div>
+    </div>
+
+    <div id="benchContent" style="display:none;">
+      <div class="card" style="border:2px solid var(--teal);background:rgba(14,165,160,0.04);">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;">
+          <div style="font-size:28px;">📊</div>
+          <div>
+            <div class="card-title" style="margin-bottom:2px;">Benchmark — Swarasthanam</div>
+            <div style="font-size:13px;color:var(--cream-dim);">5 questions · Play any in any order · No marking required</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5 question cards -->
+      <div id="benchCards" style="display:flex;flex-direction:column;gap:14px;"></div>
+
+      <!-- Regenerate -->
+      <div style="text-align:center;margin-top:20px;margin-bottom:8px;">
+        <button class="btn primary" onclick="benchGenerate()" style="font-size:15px;padding:13px 36px;">
+          🎲 New Benchmark
+        </button>
+      </div>
+    </div>
+  </div> <!-- end tab-benchmark -->
+
 </main>
 
 <script>
@@ -1224,12 +1267,18 @@ function siteUnlock() {
 // TAB NAVIGATION
 // ═══════════════════════════════════
 function switchTab(id) {
-  // Re-lock assessment tab whenever navigating away
+  // Re-lock teacher tabs whenever navigating away
   if (id !== 'assess') {
     document.getElementById('assessGate').style.display = 'block';
     document.getElementById('assessContent').style.display = 'none';
     document.getElementById('assessPassword').value = '';
     document.getElementById('assessGateError').style.display = 'none';
+  }
+  if (id !== 'benchmark') {
+    document.getElementById('benchGate').style.display = 'block';
+    document.getElementById('benchContent').style.display = 'none';
+    document.getElementById('benchPassword').value = '';
+    document.getElementById('benchGateError').style.display = 'none';
   }
   document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
@@ -1393,11 +1442,37 @@ function buildSwaraGrid() {
     btn.onmouseover = () => { btn.style.borderColor = 'var(--gold)'; btn.style.background = isAccent ? 'rgba(201,148,58,0.22)' : 'rgba(201,148,58,0.08)'; };
     btn.onmouseout  = () => { btn.style.borderColor = isAccent ? 'var(--gold)' : 'var(--border)'; btn.style.background = isAccent ? 'rgba(201,148,58,0.12)' : 'var(--surface2)'; };
 
-    btn.onclick = () => {
-      playNote(freq, 0.9, 2.5);
+    let swHeldOsc = null, swHeldGain = null;
+
+    function swStart() {
+      if (swHeldOsc) { try { swHeldOsc.stop(); } catch(e) {} }
+      const ctx = getAudioCtx();
+      swHeldOsc  = ctx.createOscillator();
+      swHeldGain = ctx.createGain();
+      swHeldOsc.connect(swHeldGain); swHeldGain.connect(masterOut);
+      swHeldOsc.type = 'triangle';
+      swHeldOsc.frequency.value = freq;
+      swHeldGain.gain.setValueAtTime(0, ctx.currentTime);
+      swHeldGain.gain.linearRampToValueAtTime(0.75, ctx.currentTime + 0.02);
+      swHeldOsc.start();
       const label = sw.line2 ? `${sw.name} / ${sw.line2}` : sw.name;
       document.getElementById('swaraStatus').textContent = `${label} — ${western} (${Math.round(freq)} Hz)`;
-    };
+    }
+
+    function swStop() {
+      if (!swHeldOsc) return;
+      const ctx = getAudioCtx();
+      swHeldGain.gain.setValueAtTime(swHeldGain.gain.value, ctx.currentTime);
+      swHeldGain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+      swHeldOsc.stop(ctx.currentTime + 0.13);
+      swHeldOsc = null; swHeldGain = null;
+    }
+
+    btn.addEventListener('mousedown',  e => { e.preventDefault(); swStart(); });
+    btn.addEventListener('mouseup',    () => swStop());
+    btn.addEventListener('mouseleave', () => swStop());
+    btn.addEventListener('touchstart', e => { e.preventDefault(); swStart(); }, { passive: false });
+    btn.addEventListener('touchend',   e => { e.preventDefault(); swStop(); },  { passive: false });
 
     grid.appendChild(btn);
   });
@@ -3968,6 +4043,108 @@ function assessRestart() {
   document.getElementById('assessResults').style.display = 'none';
   document.getElementById('assessSetup').style.display = 'block';
 }
+// ═══════════════════════════════════
+// BENCHMARK TAB
+// ═══════════════════════════════════
+// 5 questions: 2× single, 2× double, 1× triple
+// All shown at once — teacher plays any, no marking
+
+const BENCH_PLAN = [1, 1, 2, 2, 3];
+
+let benchQuestions = [];
+
+function benchUnlock() {
+  const val = document.getElementById('benchPassword').value;
+  if (val === 'GeetanjaliGuru') {
+    document.getElementById('benchGate').style.display = 'none';
+    document.getElementById('benchContent').style.display = 'block';
+    document.getElementById('benchGateError').style.display = 'none';
+    document.getElementById('benchPassword').value = '';
+    if (benchQuestions.length === 0) benchGenerate();
+  } else {
+    document.getElementById('benchGateError').style.display = 'block';
+    document.getElementById('benchPassword').value = '';
+    document.getElementById('benchPassword').focus();
+  }
+}
+
+function benchGenerate() {
+  benchQuestions = BENCH_PLAN.map(count => {
+    const pool = [...SWARA_GRID].sort(() => Math.random() - 0.5);
+    return { noteCount: count, notes: pool.slice(0, count) };
+  });
+  benchRender();
+}
+
+function benchRender() {
+  const container = document.getElementById('benchCards');
+  const typeLabels = { 1: '🎵 Single Note', 2: '🎵🎵 Two Notes', 3: '🎵🎵🎵 Three Notes' };
+  const typeColors = { 1: 'var(--teal)', 2: 'var(--saffron)', 3: 'var(--gold)' };
+
+  container.innerHTML = benchQuestions.map((q, i) => {
+    const notesHtml = q.notes.map((sw, ni) => `
+      ${ni > 0 ? '<span style="color:var(--cream-dim);font-size:20px;margin:0 4px;">→</span>' : ''}
+      <div style="
+        background:var(--surface2);border:2px solid ${typeColors[q.noteCount]};
+        border-radius:10px;padding:12px 18px;font-family:var(--font-display);
+        font-size:24px;color:var(--cream);font-weight:700;min-width:64px;text-align:center;">
+        ${sw.name}${sw.line2 ? `<div style="font-size:12px;color:var(--cream-dim);font-weight:400;margin-top:2px;">${sw.line2}</div>` : ''}
+      </div>`).join('');
+
+    return `
+      <div class="card" style="border-left:4px solid ${typeColors[q.noteCount]};">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+          <div>
+            <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;
+              color:${typeColors[q.noteCount]};margin-bottom:8px;">
+              Q${i+1} — ${typeLabels[q.noteCount]}
+            </div>
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:4px;">
+              ${notesHtml}
+            </div>
+          </div>
+          <button onclick="benchPlay(${i})" id="benchPlayBtn${i}"
+            style="background:var(--surface2);border:2px solid ${typeColors[q.noteCount]};
+            border-radius:10px;color:${typeColors[q.noteCount]};
+            font-family:var(--font-body);font-size:14px;font-weight:700;
+            padding:10px 22px;cursor:pointer;transition:all 0.15s;white-space:nowrap;"
+            onmouseover="this.style.opacity='0.8'"
+            onmouseout="this.style.opacity='1'">
+            ▶ Play
+          </button>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function benchPlay(idx) {
+  const q = benchQuestions[idx];
+  const btn = document.getElementById('benchPlayBtn' + idx);
+  btn.textContent = '♩ Playing…';
+  btn.disabled = true;
+
+  const spacing = 0.75;
+  q.notes.forEach((sw, i) => {
+    const freq = MID_FREQS[selectedPitch] * Math.pow(2, sw.semi / 12);
+    const ctx = getAudioCtx();
+    const osc = ctx.createOscillator(); const gain = ctx.createGain();
+    osc.connect(gain); gain.connect(masterOut);
+    osc.type = 'triangle'; osc.frequency.value = freq;
+    const t = ctx.currentTime + i * spacing;
+    gain.gain.setValueAtTime(0, t);
+    gain.gain.linearRampToValueAtTime(0.75, t + 0.02);
+    gain.gain.setValueAtTime(0.75, t + 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.7);
+    osc.start(t); osc.stop(t + 0.75);
+  });
+
+  const doneMs = q.notes.length * spacing * 1000 + 300;
+  setTimeout(() => {
+    btn.textContent = '▶ Play';
+    btn.disabled = false;
+  }, doneMs);
+}
+
 </script>
 </div> <!-- end siteApp -->
 </body>

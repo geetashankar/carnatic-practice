@@ -2748,6 +2748,7 @@ const GAME_LEVELS = [
 ];
 
 let gameSequence  = [];
+let gameLastNote  = null; // tracks the very last note played across rounds, so back-to-back repeats never happen
 let gameGuessIdx  = 0;
 let gameStreak    = 0;
 let gameBestStreak = 0;
@@ -2812,10 +2813,17 @@ function generateGameSequence() {
   const seq = [];
   for (let i = 0; i < noteCount; i++) {
     let pick;
-    do { pick = pool[Math.floor(Math.random() * pool.length)]; }
-    while (seq.length > 0 && pick === seq[seq.length - 1]);
+    do {
+      pick = pool[Math.floor(Math.random() * pool.length)];
+    } while (
+      pool.length > 1 && (
+        (seq.length > 0 && pick === seq[seq.length - 1]) ||           // no repeat within sequence
+        (seq.length === 0 && pick === gameLastNote)                    // no repeat across rounds
+      )
+    );
     seq.push(pick);
   }
+  gameLastNote = seq[seq.length - 1]; // remember the final note for next round's check
   return seq;
 }
 
@@ -2878,6 +2886,7 @@ function startGame() {
   gameStreak = 0; gameBestStreak = 0; gameScore = 0;
   gameTotalAnswered = 0; gameTotalCorrect = 0; gameGuessIdx = 0;
   gameL5Notes = 3; gameL5PerfectRuns = 0; gameCurrentRoundCorrect = true;
+  gameLastNote = null;
   document.getElementById('gameSetup').style.display = 'none';
   document.getElementById('gamePlay').style.display = 'block';
   const lv = GAME_LEVELS[gameLevelIdx];

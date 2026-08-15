@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  upload-pages-artifact:
+  build-and-upload:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -14,14 +14,24 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
       - name: Upload artifact for GitHub Pages
         uses: actions/upload-pages-artifact@v1
         with:
-          # Deploy the repository root (adjust if your static site is in a subfolder like `dist` or `public`)
-          path: './'
+          path: ./build
 
   deploy:
-    needs: upload-pages-artifact
+    needs: build-and-upload
     runs-on: ubuntu-latest
     permissions:
       pages: write
